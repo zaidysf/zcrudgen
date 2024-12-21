@@ -1,5 +1,15 @@
 # ZCrudGen - Laravel CRUD API Generator
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/zaidysf/zcrudgen.svg?style=flat-square)](https://packagist.org/packages/zaidysf/zcrudgen)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/zaidysf/zcrudgen/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/zaidysf/zcrudgen/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/zaidysf/zcrudgen/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/zaidysf/zcrudgen/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/zaidysf/zcrudgen.svg?style=flat-square)](https://packagist.org/packages/zaidysf/zcrudgen)
+[![License](https://img.shields.io/packagist/l/zaidysf/zcrudgen.svg?style=flat-square)](https://packagist.org/packages/zaidysf/zcrudgen)
+[![PHP Version](https://img.shields.io/packagist/php-v/zaidysf/zcrudgen.svg?style=flat-square)](https://packagist.org/packages/zaidysf/zcrudgen)
+[![Laravel Version](https://img.shields.io/badge/Laravel-10.x|11.x-brightgreen.svg?style=flat-square)](https://packagist.org/packages/zaidysf/zcrudgen)
+[![Static Analysis](https://img.shields.io/github/actions/workflow/status/zaidysf/zcrudgen/phpstan.yml?branch=main&label=phpstan&style=flat-square)](https://github.com/zaidysf/zcrudgen/actions?query=workflow%3Aphpstan+branch%3Amain)
+[![GitHub Release Date](https://img.shields.io/github/release-date/zaidysf/zcrudgen?style=flat-square)](https://github.com/zaidysf/zcrudgen/releases)
+
 A sophisticated Laravel package that automates the creation of production-ready CRUD APIs. Built with modern Laravel practices in mind, ZCrudGen generates fully functional REST APIs following the Service Repository pattern, complete with advanced features like intelligent filtering, OpenAPI documentation, and AI-powered business logic.
 
 ## 🚀 Key Features
