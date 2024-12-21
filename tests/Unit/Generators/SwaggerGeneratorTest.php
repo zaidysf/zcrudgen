@@ -12,7 +12,7 @@ class SwaggerGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new SwaggerGenerator();
+        $this->generator = new SwaggerGenerator;
 
         // Enable Swagger in config
         config(['zcrudgen.swagger.enabled' => true]);
