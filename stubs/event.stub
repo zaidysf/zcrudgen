@@ -1,0 +1,25 @@
+protected function generateEvents(string $name, array $events): void
+{
+    if (empty($events)) {
+        return;
+    }
+
+    $eventPath = config('zcrudgen.paths.event', app_path('Events'));
+    $className = $this->studlyCase($name);
+
+    foreach ($events as $eventName) {
+        $eventClassName = $this->studlyCase($eventName);
+
+        $replacements = [
+            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Events',
+            '{{ class }}' => $eventClassName,
+            '{{ model }}' => $className,
+            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+        ];
+
+        $content = $this->generateClass('event', $replacements);
+        $path = $eventPath . '/' . $eventClassName . '.php';
+
+        $this->put($path, $content);
+    }
+}
