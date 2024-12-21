@@ -2,4 +2,6 @@
 
 namespace ZaidYasyaf\Zcrudgen;
 
-class Zcrudgen {}
+class Zcrudgen
+{
+}
