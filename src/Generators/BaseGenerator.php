@@ -13,12 +13,12 @@ abstract class BaseGenerator
 
     public function __construct()
     {
-        $this->stubPath = __DIR__ . '/../../stubs/';
+        $this->stubPath = __DIR__.'/../../stubs/';
     }
 
     protected function generateClass(string $type, array $replacements): string
     {
-        $stub = File::get($this->stubPath . $type . '.stub');
+        $stub = File::get($this->stubPath.$type.'.stub');
 
         return str_replace(
             array_keys($replacements),

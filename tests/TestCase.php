@@ -41,8 +41,8 @@ PHP;
 
     protected function copyStubs(): void
     {
-        $stubsPath = __DIR__ . '/../stubs';
-        $testStubsPath = __DIR__ . '/stubs';
+        $stubsPath = __DIR__.'/../stubs';
+        $testStubsPath = __DIR__.'/stubs';
 
         if (! File::isDirectory($testStubsPath)) {
             File::copyDirectory($stubsPath, $testStubsPath);

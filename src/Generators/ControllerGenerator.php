@@ -12,19 +12,19 @@ class ControllerGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Controllers\\API',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Controllers\\API',
             '{{ class }}' => $className,
-            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
-            '{{ service_namespace }}' => config('zcrudgen.namespace') . '\\Services\\' . $className . 'Service',
-            '{{ resource_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Resources\\' . $className . 'Resource',
-            '{{ request_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Requests',
+            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
+            '{{ service_namespace }}' => config('zcrudgen.namespace').'\\Services\\'.$className.'Service',
+            '{{ resource_namespace }}' => config('zcrudgen.namespace').'\\Http\\Resources\\'.$className.'Resource',
+            '{{ request_namespace }}' => config('zcrudgen.namespace').'\\Http\\Requests',
             '{{ route_prefix }}' => Str::plural(Str::kebab($name)),
             '{{ middleware }}' => $this->generateMiddleware($middleware, $usePermissions, $name),
             '{{ permissions }}' => $this->generatePermissions($usePermissions, $name),
         ];
 
         $content = $this->generateClass('controller', $replacements);
-        $path = $controllerPath . '/' . $className . 'Controller.php';
+        $path = $controllerPath.'/'.$className.'Controller.php';
 
         $this->put($path, $content);
 
@@ -40,10 +40,10 @@ class ControllerGenerator extends BaseGenerator
         }
 
         if ($usePermissions) {
-            $middlewares[] = 'permission:' . Str::kebab($name);
+            $middlewares[] = 'permission:'.Str::kebab($name);
         }
 
-        return empty($middlewares) ? '' : "\$this->middleware(['" . implode("', '", $middlewares) . "']);";
+        return empty($middlewares) ? '' : "\$this->middleware(['".implode("', '", $middlewares)."']);";
     }
 
     protected function generatePermissions(bool $usePermissions, string $name): string
@@ -103,7 +103,7 @@ PHP;
 
     protected function getExample(string $column, string $type): string
     {
-        return match(true) {
+        return match (true) {
             $column === 'email' => 'user@example.com',
             $column === 'name' => 'John Doe',
             $column === 'password' => '********',

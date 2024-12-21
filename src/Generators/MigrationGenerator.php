@@ -23,11 +23,11 @@ class MigrationGenerator extends BaseGenerator
         }
 
         $timestamp = date('Y_m_d_His');
-        $filename = $timestamp . "_create_{$tableName}_table.php";
-        $path = $migrationPath . '/' . $filename;
+        $filename = $timestamp."_create_{$tableName}_table.php";
+        $path = $migrationPath.'/'.$filename;
 
         $replacements = [
-            '{{ class }}' => 'Create' . Str::studly($tableName) . 'Table',
+            '{{ class }}' => 'Create'.Str::studly($tableName).'Table',
             '{{ table }}' => $tableName,
             '{{ schema }}' => $this->generateSchema($columns),
         ];
@@ -81,7 +81,7 @@ class MigrationGenerator extends BaseGenerator
         if (str_ends_with($column, '_id')) {
             $reference = str_replace('_id', '', $column);
 
-            return "\$table->foreignId('{$column}')->constrained('" . Str::plural($reference) . "');";
+            return "\$table->foreignId('{$column}')->constrained('".Str::plural($reference)."');";
         }
 
         return match (true) {
