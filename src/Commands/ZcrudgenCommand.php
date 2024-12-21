@@ -11,6 +11,7 @@ use ZaidYasyaf\Zcrudgen\Generators\RepositoryGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\RequestGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ResourceGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ServiceGenerator;
+use ZaidYasyaf\Zcrudgen\Generators\TestGenerator;
 
 class ZcrudgenCommand extends Command
 {
@@ -44,10 +45,17 @@ class ZcrudgenCommand extends Command
         $this->generateController($name, $middleware, $usePermissions);
         $this->generateRequests($name, $columns);
         $this->generateResource($name, $columns);
+        $this->generateTests($name, $columns);
 
         $this->info('CRUD generated successfully for '.$name.' model!');
 
         return self::SUCCESS;
+    }
+
+    protected function generateTests(string $name, array $columns): void
+    {
+        $generator = new TestGenerator();
+        $generator->generate($name, $columns);
     }
 
     protected function generateModel(string $name, array $columns, ?string $relations): void

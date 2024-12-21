@@ -1,0 +1,115 @@
+<?php
+
+namespace {{ namespace }};
+
+use Tests\TestCase;
+use {{ model_namespace }};
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class {{ class }}ControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withHeaders([
+            'Accept' => 'application/json'
+        ]);
+    }
+
+    public function test_can_list_{{ model_plural_lower }}(): void
+    {
+        // Arrange
+        {{ model }}::factory(3)->create();
+
+        // Act
+        $response = $this->get('/api/{{ route_prefix }}');
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        {{ json_structure }}
+                    ]
+                ]
+            ]);
+    }
+
+    public function test_can_create_{{ model_singular_lower }}(): void
+    {
+        // Arrange
+        $data = {{ model }}::factory()->make()->toArray();
+
+        // Act
+        $response = $this->post('/api/{{ route_prefix }}', $data);
+
+        // Assert
+        $response->assertCreated()
+            ->assertJsonStructure([
+                'data' => [
+                    {{ json_structure }}
+                ]
+            ]);
+
+        $this->assertDatabaseHas('{{ table }}', [
+            {{ database_assertions }}
+        ]);
+    }
+
+    public function test_can_show_{{ model_singular_lower }}(): void
+    {
+        // Arrange
+        ${{ model_variable }} = {{ model }}::factory()->create();
+
+        // Act
+        $response = $this->get('/api/{{ route_prefix }}/' . ${{ model_variable }}->id);
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    {{ json_structure }}
+                ]
+            ]);
+    }
+
+    public function test_can_update_{{ model_singular_lower }}(): void
+    {
+        // Arrange
+        ${{ model_variable }} = {{ model }}::factory()->create();
+        $data = {{ model }}::factory()->make()->toArray();
+
+        // Act
+        $response = $this->put('/api/{{ route_prefix }}/' . ${{ model_variable }}->id, $data);
+
+        // Assert
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    {{ json_structure }}
+                ]
+            ]);
+
+        $this->assertDatabaseHas('{{ table }}', [
+            'id' => ${{ model_variable }}->id,
+            {{ database_assertions }}
+        ]);
+    }
+
+    public function test_can_delete_{{ model_singular_lower }}(): void
+    {
+        // Arrange
+        ${{ model_variable }} = {{ model }}::factory()->create();
+
+        // Act
+        $response = $this->delete('/api/{{ route_prefix }}/' . ${{ model_variable }}->id);
+
+        // Assert
+        $response->assertOk();
+        $this->assertDatabaseMissing('{{ table }}', [
+            'id' => ${{ model_variable }}->id
+        ]);
+    }
+}
