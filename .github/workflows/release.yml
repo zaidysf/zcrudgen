@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -32,6 +34,31 @@ jobs:
         run: |
           zip -r zcrudgen.zip . -x ".git/*" "vendor/*" ".github/*"
 
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}\n\n## 🚀 Features\n\n#{{FEATURES}}\n\n## 🐛 Fixes\n\n#{{FIXES}}\n\n## 📦 Other\n\n#{{OTHERS}}",
+              "categories": [
+                {
+                    "title": "## 🚀 Features",
+                    "labels": ["feature", "enhancement"]
+                },
+                {
+                    "title": "## 🐛 Fixes",
+                    "labels": ["fix", "bug"]
+                },
+                {
+                    "title": "## 📦 Other",
+                    "labels": []
+                }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
@@ -39,6 +66,7 @@ jobs:
             zcrudgen.zip
             LICENSE.md
             README.md
+          body: ${{ steps.changelog.outputs.changelog }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
