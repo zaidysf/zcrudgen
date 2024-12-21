@@ -12,7 +12,7 @@ class ModelGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new ModelGenerator;
+        $this->generator = new ModelGenerator();
     }
 
     public function test_can_generate_simple_model(): void

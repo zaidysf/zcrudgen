@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write  # Allow publishing to GitHub Packages
 
     steps:
       - name: Checkout code
@@ -68,5 +69,13 @@ jobs:
             README.md
           body: ${{ steps.changelog.outputs.changelog }}
           generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to GitHub Packages
+        run: |
+          composer config --global github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
+          composer config repositories.github vcs https://github.com/zaidysf/zcrudgen
+          composer publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
