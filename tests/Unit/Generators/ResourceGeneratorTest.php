@@ -12,7 +12,7 @@ class ResourceGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new ResourceGenerator();
+        $this->generator = new ResourceGenerator;
     }
 
     public function test_can_generate_resource(): void
