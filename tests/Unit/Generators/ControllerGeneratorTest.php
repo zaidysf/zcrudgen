@@ -12,7 +12,7 @@ class ControllerGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new ControllerGenerator();
+        $this->generator = new ControllerGenerator;
     }
 
     public function test_can_generate_controller_without_middleware(): void

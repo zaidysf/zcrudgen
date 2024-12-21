@@ -12,7 +12,7 @@ class RouteGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new RouteGenerator();
+        $this->generator = new RouteGenerator;
     }
 
     public function test_can_generate_api_route(): void
