@@ -77,3 +77,8 @@ jobs:
           composer config --global github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
           composer config repositories.github vcs https://github.com/zaidysf/zcrudgen
 
+      - name: Publish to GitHub Packages
+        run: composer publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
