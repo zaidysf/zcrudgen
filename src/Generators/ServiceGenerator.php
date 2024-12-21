@@ -15,7 +15,7 @@ class ServiceGenerator extends BaseGenerator
         // Get AI-generated logic if enabled
         $aiLogic = [];
         if (config('zcrudgen.ai.enabled', false)) {
-            $aiGenerator = new AiGenerator();
+            $aiGenerator = new AiGenerator;
             $aiLogic = $aiGenerator->generateBusinessLogic($name, $columns);
         }
 
