@@ -13,7 +13,7 @@ class TestGenerator extends BaseGenerator
 
         $replacements = [
             '{{ namespace }}' => 'Tests\\Feature\\Api',
-            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
             '{{ class }}' => $className,
             '{{ model }}' => $className,
             '{{ model_plural_lower }}' => Str::plural(Str::lower($name)),
@@ -26,7 +26,7 @@ class TestGenerator extends BaseGenerator
         ];
 
         $content = $this->generateClass('test.feature', $replacements);
-        $path = $testPath . '/' . $className . 'ControllerTest.php';
+        $path = $testPath.'/'.$className.'ControllerTest.php';
 
         $this->makeDirectory(dirname($path));
         $this->put($path, $content);
@@ -40,10 +40,10 @@ class TestGenerator extends BaseGenerator
     protected function generateJsonStructure(array $columns): string
     {
         $structure = array_filter($columns, function ($column) {
-            return !in_array($column, ['password']);
+            return ! in_array($column, ['password']);
         });
 
-        return "'" . implode("',\n                        '", $structure) . "'";
+        return "'".implode("',\n                        '", $structure)."'";
     }
 
     protected function generateDatabaseAssertions(array $columns): string
@@ -65,16 +65,16 @@ class TestGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Database\\Factories',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Database\\Factories',
             '{{ class }}' => $className,
-            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
             '{{ factory_definition }}' => $this->generateFactoryDefinition($columns),
         ];
 
         $content = $this->generateClass('factory', $replacements);
-        $path = $factoryPath . '/' . $className . 'Factory.php';
+        $path = $factoryPath.'/'.$className.'Factory.php';
 
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             $this->makeDirectory(dirname($path));
             $this->put($path, $content);
         }
@@ -98,6 +98,7 @@ class TestGenerator extends BaseGenerator
     {
         if (str_ends_with($column, '_id')) {
             $related = Str::studly(str_replace('_id', '', $column));
+
             return "'$column' => \\{$related}::factory()";
         }
 

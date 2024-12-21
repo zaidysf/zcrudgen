@@ -54,7 +54,7 @@ class ZcrudgenCommand extends Command
 
     protected function generateTests(string $name, array $columns): void
     {
-        $generator = new TestGenerator();
+        $generator = new TestGenerator;
         $generator->generate($name, $columns);
     }
 
