@@ -8,6 +8,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout code
@@ -26,26 +29,9 @@ jobs:
       - name: Run tests
         run: composer test
 
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.3.1
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
-          body: ${{ steps.changelog.outputs.changelog }}
-          files: |
-            LICENSE.md
-            README.md
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to Packagist
-        env:
-          COMPOSER_AUTH: '{"http-basic": {"repo.packagist.org": {"username": "${{ secrets.PACKAGIST_USERNAME }}", "password": "${{ secrets.PACKAGIST_TOKEN }}"}}}'
-        run: |
-          curl -XPOST -H'content-type:application/json' \
-            'https://packagist.org/api/update-package?username=${{ secrets.PACKAGIST_USERNAME }}&apiToken=${{ secrets.PACKAGIST_TOKEN }}' \
-            -d'{"repository":{"url":"https://github.com/zaidysf/zcrudgen"}}'

@@ -43,6 +43,8 @@ A sophisticated Laravel package that automates the creation of production-ready 
 # ZCrudGen Documentation
 
 ## Table of Contents
+1. [Requirements](#requirements)
+1. [Dependencies](#dependencies)
 1. [Installation](#installation)
 2. [Configuration](#configuration)
 3. [Basic Usage](#basic-usage)
@@ -52,11 +54,38 @@ A sophisticated Laravel package that automates the creation of production-ready 
 7. [Testing](#testing)
 8. [Contributing](#contributing)
 
+## Requirements
+
+- PHP 8.2 or higher
+- Laravel 10.x or 11.x
+- Scramble for Laravel (`composer require dedoc/scramble`)
+
+## Dependencies
+This package relies on the following packages:
+- spatie/laravel-package-tools
+- dedoc/scramble (for API documentation)
+
 ## Installation
 
+1. Install the package via composer:
 ```bash
 composer require zaidysf/zcrudgen
 php artisan vendor:publish --provider="ZaidYasyaf\Zcrudgen\ZcrudgenServiceProvider"
+```
+
+2. Add Scramble route in your routes/web.php:
+```php
+Route::scramble();
+```
+
+3. Publish Scramble config (optional):
+```bash
+php artisan vendor:publish --tag=scramble-config
+```
+
+4. Access your API documentation at:
+```
+http://your-app-url/docs/api
 ```
 
 ## Configuration
