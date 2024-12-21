@@ -12,7 +12,7 @@ class RepositoryGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new RepositoryGenerator();
+        $this->generator = new RepositoryGenerator;
     }
 
     public function test_can_generate_repository_files(): void
