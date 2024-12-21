@@ -1,5 +1,4 @@
 <?php
-
 namespace {{ namespace }};
 
 use {{ model_namespace }};
@@ -11,6 +10,123 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
+/**
+ * @openapi
+ * /api/{{ route_prefix }}:
+ *   get:
+ *     tags: ["{{ class }}"]
+ *     summary: List all {{ route_prefix }}
+ *     parameters:
+ *       - name: filter
+ *         in: query
+ *         description: Filter parameters
+ *         schema:
+ *           type: object
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/{{ class }}'
+ *
+ *   post:
+ *     tags: ["{{ class }}"]
+ *     summary: Create new {{ class }}
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 {{ request_properties }}
+ *     responses:
+ *       201:
+ *         description: Created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/{{ class }}'
+ *
+ * /api/{{ route_prefix }}/{id}:
+ *   get:
+ *     tags: ["{{ class }}"]
+ *     summary: Get specific {{ class }}
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/{{ class }}'
+ *
+ *   put:
+ *     tags: ["{{ class }}"]
+ *     summary: Update {{ class }}
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *                 {{ request_properties }}
+ *     responses:
+ *       200:
+ *         description: Updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/{{ class }}'
+ *
+ *   delete:
+ *     tags: ["{{ class }}"]
+ *     summary: Delete {{ class }}
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: {{ class }} deleted successfully
+ */
 class {{ class }}Controller extends Controller
 {
     protected $service;
@@ -19,73 +135,33 @@ class {{ class }}Controller extends Controller
     {
         $this->service = $service;
         {{ middleware }}
-    }{{ permissions }}
+    }
+    {{ permissions }}
 
-    /**
-     * @OA\Get(
-     *     path="/api/{{ route_prefix }}",
-     *     summary="List all {{ route_prefix }}",
-     *     tags=["{{ class }}"],
-     *     @OA\Response(response=200, description="Success")
-     * )
-     */
     public function index(): AnonymousResourceCollection
     {
-        $filters = request()->except(['page', 'per_page']);
-        $data = $this->service->getAll($filters);
+        $data = $this->service->getAll(request()->all());
         return {{ class }}Resource::collection($data);
     }
 
-    /**
-     * @OA\Get(
-     *     path="/api/{{ route_prefix }}/{id}",
-     *     summary="Get specific {{ class }}",
-     *     tags=["{{ class }}"],
-     *     @OA\Response(response=200, description="Success")
-     * )
-     */
     public function show(int $id): {{ class }}Resource
     {
         $data = $this->service->find($id);
         return new {{ class }}Resource($data);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/{{ route_prefix }}",
-     *     summary="Create new {{ class }}",
-     *     tags=["{{ class }}"],
-     *     @OA\Response(response=201, description="Created successfully")
-     * )
-     */
     public function store(Create{{ class }}Request $request): {{ class }}Resource
     {
         $data = $this->service->create($request->validated());
         return new {{ class }}Resource($data);
     }
 
-    /**
-     * @OA\Put(
-     *     path="/api/{{ route_prefix }}/{id}",
-     *     summary="Update {{ class }}",
-     *     tags=["{{ class }}"],
-     *     @OA\Response(response=200, description="Updated successfully")
-     * )
-     */
     public function update(Update{{ class }}Request $request, int $id): {{ class }}Resource
     {
         $data = $this->service->update($id, $request->validated());
         return new {{ class }}Resource($data);
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/{{ route_prefix }}/{id}",
-     *     summary="Delete {{ class }}",
-     *     tags=["{{ class }}"],
-     *     @OA\Response(response=200, description="Deleted successfully")
-     * )
-     */
     public function destroy(int $id): JsonResponse
     {
         $this->service->delete($id);

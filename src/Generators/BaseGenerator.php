@@ -7,34 +7,31 @@ use Illuminate\Support\Str;
 
 abstract class BaseGenerator
 {
-    protected string $stubPath;
-
     protected array $replacements = [];
+
+    protected string $stubPath;
 
     public function __construct()
     {
-        $this->stubPath = __DIR__.'/../../stubs/';
+        $this->stubPath = __DIR__ . '/../../stubs/';
     }
 
-    protected function getStub(string $type): string
+    protected function generateClass(string $type, array $replacements): string
     {
-        return File::get($this->stubPath.$type.'.stub');
+        $stub = File::get($this->stubPath . $type . '.stub');
+
+        return str_replace(
+            array_keys($replacements),
+            array_values($replacements),
+            $stub
+        );
     }
 
     protected function makeDirectory(string $path): void
     {
         if (! File::isDirectory($path)) {
-            File::makeDirectory($path, 0755, true);
+            File::makeDirectory($path, 0777, true);
         }
-    }
-
-    protected function generateClass(string $stub, array $replacements): string
-    {
-        return str_replace(
-            array_keys($replacements),
-            array_values($replacements),
-            $this->getStub($stub)
-        );
     }
 
     protected function put(string $path, string $content): void
@@ -46,6 +43,11 @@ abstract class BaseGenerator
     protected function studlyCase(string $value): string
     {
         return Str::studly($value);
+    }
+
+    protected function getStub(string $type): string
+    {
+        return File::get($this->stubPath.$type.'.stub');
     }
 
     protected function camelCase(string $value): string

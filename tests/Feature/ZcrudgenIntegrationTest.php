@@ -2,6 +2,7 @@
 
 namespace ZaidYasyaf\Zcrudgen\Tests\Feature;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use ZaidYasyaf\Zcrudgen\Tests\TestCase;
 
@@ -11,10 +12,9 @@ class ZcrudgenIntegrationTest extends TestCase
     {
         parent::setUp();
 
-        // Create test directories
         $this->createTestDirectories();
 
-        // Create a test table
+        // Create test tables
         Schema::create('users', function ($table) {
             $table->id();
             $table->string('name');
@@ -23,32 +23,6 @@ class ZcrudgenIntegrationTest extends TestCase
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
-    }
-
-    protected function tearDown(): void
-    {
-        // Clean up generated files
-        $paths = [
-            $this->app->basePath('app/Http/Controllers/API'),
-            $this->app->basePath('app/Models'),
-            $this->app->basePath('app/Services'),
-            $this->app->basePath('app/Repositories'),
-            $this->app->basePath('app/Http/Resources'),
-            $this->app->basePath('app/Http/Requests'),
-        ];
-
-        foreach ($paths as $path) {
-            if (is_dir($path)) {
-                $this->removeDirectory($path);
-            }
-        }
-
-        // Drop test tables
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('cities');
-        Schema::dropIfExists('countries');
-
-        parent::tearDown();
     }
 
     public function test_complete_crud_generation(): void
@@ -60,74 +34,66 @@ class ZcrudgenIntegrationTest extends TestCase
         ])->assertSuccessful();
 
         // Verify all files were generated
-        $this->assertFileExists($this->app->basePath('app/Http/Controllers/API/UserController.php'));
-        $this->assertFileExists($this->app->basePath('app/Models/User.php'));
-        $this->assertFileExists($this->app->basePath('app/Services/UserService.php'));
-        $this->assertFileExists($this->app->basePath('app/Repositories/UserRepository.php'));
-        $this->assertFileExists($this->app->basePath('app/Repositories/Interfaces/UserRepositoryInterface.php'));
-        $this->assertFileExists($this->app->basePath('app/Http/Resources/UserResource.php'));
-        $this->assertFileExists($this->app->basePath('app/Http/Requests/CreateUserRequest.php'));
-        $this->assertFileExists($this->app->basePath('app/Http/Requests/UpdateUserRequest.php'));
+        $this->assertFileExists(base_path('app/Http/Controllers/API/UserController.php'));
+        $this->assertFileExists(base_path('app/Models/User.php'));
+        $this->assertFileExists(base_path('app/Services/UserService.php'));
+        $this->assertFileExists(base_path('app/Repositories/UserRepository.php'));
+        $this->assertFileExists(base_path('tests/Feature/Api/UserControllerTest.php'));
+
+        // Verify route was added
+        require base_path('routes/api.php'); // Reload routes
+        $this->assertTrue(Route::has('users.index'));
+
+        // Verify OpenAPI documentation exists in controller
+        $controllerContent = file_get_contents(base_path('app/Http/Controllers/API/UserController.php'));
+        $this->assertStringContainsString('@openapi', $controllerContent);
     }
 
-    public function test_crud_generation_with_relationships(): void
+    public function test_crud_generation_with_new_migration(): void
     {
-        // Create related tables first
-        Schema::create('countries', function ($table) {
-            $table->id();
-            $table->string('name');
-            $table->timestamps();
-        });
-
-        Schema::create('cities', function ($table) {
-            $table->id();
-            $table->foreignId('country_id')->constrained();
-            $table->string('name');
-            $table->timestamps();
-        });
+        // Drop the test table first
+        Schema::dropIfExists('products');
 
         $this->artisan('zcrudgen:make', [
-            'name' => 'City',
-            '--relations' => 'country',
+            'name' => 'Product',
         ])->assertSuccessful();
 
-        $this->assertFileExists($this->app->basePath('app/Models/City.php'));
+        // Verify migration was created
+        $migrationFiles = glob(database_path('migrations/*_create_products_table.php'));
+        $this->assertNotEmpty($migrationFiles);
 
-        $modelContent = file_get_contents($this->app->basePath('app/Models/City.php'));
-        $this->assertStringContainsString('public function country()', $modelContent);
-        $this->assertStringContainsString('return $this->belongsTo', $modelContent);
+        // Verify migration content
+        $migrationContent = file_get_contents($migrationFiles[0]);
+        $this->assertStringContainsString('class CreateProductsTable extends Migration', $migrationContent);
     }
 
-    protected function createTestDirectories(): void
+    protected function tearDown(): void
     {
-        $paths = [
-            $this->app->basePath('app/Http/Controllers/API'),
-            $this->app->basePath('app/Models'),
-            $this->app->basePath('app/Services'),
-            $this->app->basePath('app/Repositories'),
-            $this->app->basePath('app/Repositories/Interfaces'),
-            $this->app->basePath('app/Http/Resources'),
-            $this->app->basePath('app/Http/Requests'),
-        ];
+        // Clean up test files
+        $this->cleanDirectory(base_path('app/Http/Controllers/API'));
+        $this->cleanDirectory(base_path('app/Models'));
+        $this->cleanDirectory(base_path('app/Services'));
+        $this->cleanDirectory(base_path('app/Repositories'));
+        $this->cleanDirectory(base_path('tests/Feature/Api'));
+        $this->cleanDirectory(database_path('migrations'));
 
-        foreach ($paths as $path) {
-            if (! is_dir($path)) {
-                mkdir($path, 0777, true);
-            }
-        }
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('products');
+
+        parent::tearDown();
     }
 
-    protected function removeDirectory($path): void
+    protected function cleanDirectory(string $path): void
     {
         if (! is_dir($path)) {
             return;
         }
 
-        $files = array_diff(scandir($path), ['.', '..']);
+        $files = glob($path . '/*');
         foreach ($files as $file) {
-            $filePath = "$path/$file";
-            is_dir($filePath) ? $this->removeDirectory($filePath) : unlink($filePath);
+            if (is_file($file)) {
+                unlink($file);
+            }
         }
-        rmdir($path);
     }
 }

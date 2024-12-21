@@ -1,0 +1,22 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ imports }}
+
+class {{ class }}Service
+{
+    {{ traits }}
+
+    protected $repository;
+
+    /**
+     * Create a new service instance.
+     */
+    public function __construct({{ class }}RepositoryInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    {{ methods }}
+}

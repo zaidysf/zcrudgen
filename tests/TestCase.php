@@ -2,20 +2,96 @@
 
 namespace ZaidYasyaf\Zcrudgen\Tests;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Orchestra\Testbench\TestCase as Orchestra;
 use ZaidYasyaf\Zcrudgen\ZcrudgenServiceProvider;
 
 class TestCase extends Orchestra
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->setUpDatabase();
         $this->createTestDirectories();
+        $this->setUpDatabase();
+        $this->copyStubs();
+        $this->createInitialRoutes();
+    }
+
+    protected function createInitialRoutes(): void
+    {
+        $routePath = base_path('routes/api.php');
+
+        if (! File::exists($routePath)) {
+            $content = <<<PHP
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::group(['prefix' => 'api'], function () {
+    // API routes will be added here
+});
+PHP;
+            File::put($routePath, $content);
+        }
+
+        // Load the routes
+        require $routePath;
+    }
+
+    protected function copyStubs(): void
+    {
+        $stubsPath = __DIR__ . '/../stubs';
+        $testStubsPath = __DIR__ . '/stubs';
+
+        if (! File::isDirectory($testStubsPath)) {
+            File::copyDirectory($stubsPath, $testStubsPath);
+        }
+    }
+
+    protected function createTestDirectories(): void
+    {
+        $paths = [
+            app_path('Http/Controllers/API'),
+            app_path('Models'),
+            app_path('Services'),
+            app_path('Repositories'),
+            app_path('Repositories/Interfaces'),
+            app_path('Http/Resources'),
+            app_path('Http/Requests'),
+            base_path('routes'),
+            database_path('migrations'),
+            base_path('tests/Feature/Api'),
+        ];
+
+        foreach ($paths as $path) {
+            if (! File::isDirectory($path)) {
+                File::makeDirectory($path, 0777, true);
+            }
+        }
+
+        // Create routes file if it doesn't exist
+        if (! File::exists(base_path('routes/api.php'))) {
+            File::put(
+                base_path('routes/api.php'),
+                "<?php\n\nuse Illuminate\Support\Facades\Route;\n"
+            );
+        }
+    }
+
+    protected function getEnvironmentSetUp($app): void
+    {
+        config()->set('database.default', 'testing');
+
+        config()->set('zcrudgen.paths', [
+            'model' => app_path('Models'),
+            'controller' => app_path('Http/Controllers/API'),
+            'repository' => app_path('Repositories'),
+            'service' => app_path('Services'),
+            'resource' => app_path('Http/Resources'),
+            'request' => app_path('Http/Requests'),
+            'test' => base_path('tests/Feature/Api'),
+        ]);
     }
 
     protected function getPackageProviders($app): array
@@ -25,48 +101,24 @@ class TestCase extends Orchestra
         ];
     }
 
-    protected function getEnvironmentSetUp($app): void
+    protected function makeDirectory(string $path): void
     {
-        // Setup default database
-        $app['config']->set('database.default', 'testing');
-        $app['config']->set('database.connections.testing', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
-        ]);
+        if (! File::isDirectory($path)) {
+            File::makeDirectory($path, 0777, true, true);
+        }
+    }
 
-        // Setup package configuration
-        $app['config']->set('zcrudgen.paths', [
-            'model' => $app->basePath('app/Models'),
-            'controller' => $app->basePath('app/Http/Controllers/API'),
-            'repository' => $app->basePath('app/Repositories'),
-            'service' => $app->basePath('app/Services'),
-            'resource' => $app->basePath('app/Http/Resources'),
-            'request' => $app->basePath('app/Http/Requests'),
-        ]);
+    protected function cleanDirectory(string $path): void
+    {
+        if (! File::isDirectory($path)) {
+            return;
+        }
+
+        File::cleanDirectory($path);
     }
 
     protected function setUpDatabase(): void
     {
-        // Create tables if needed for tests
-    }
-
-    protected function createTestDirectories(): void
-    {
-        $paths = [
-            $this->app->basePath('app/Http/Controllers/API'),
-            $this->app->basePath('app/Models'),
-            $this->app->basePath('app/Services'),
-            $this->app->basePath('app/Repositories'),
-            $this->app->basePath('app/Repositories/Interfaces'),
-            $this->app->basePath('app/Http/Resources'),
-            $this->app->basePath('app/Http/Requests'),
-        ];
-
-        foreach ($paths as $path) {
-            if (! is_dir($path)) {
-                mkdir($path, 0777, true);
-            }
-        }
+        // Add any database setup if needed
     }
 }

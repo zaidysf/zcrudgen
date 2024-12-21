@@ -2,6 +2,7 @@
 
 namespace ZaidYasyaf\Zcrudgen\Generators;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class RouteGenerator extends BaseGenerator
@@ -13,15 +14,15 @@ class RouteGenerator extends BaseGenerator
         $routePrefix = Str::plural(Str::kebab($name));
 
         // Check if route already exists
-        $currentRoutes = file_get_contents($routePath);
+        $currentRoutes = File::get($routePath);
         if (str_contains($currentRoutes, $routePrefix)) {
             return $routePath;
         }
 
-        $newRoute = "\nRoute::apiResource('{$routePrefix}', App\\Http\\Controllers\\API\\{$className}Controller::class);";
+        $newRoute = "\nRoute::apiResource('{$routePrefix}', App\\Http\\Controllers\\API\\{$className}Controller::class);\n";
 
         // Append route to api.php
-        file_put_contents($routePath, $newRoute, FILE_APPEND);
+        File::append($routePath, $newRoute);
 
         return $routePath;
     }

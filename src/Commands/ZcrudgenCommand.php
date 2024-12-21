@@ -11,6 +11,7 @@ use ZaidYasyaf\Zcrudgen\Generators\ModelGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\RepositoryGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\RequestGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ResourceGenerator;
+use ZaidYasyaf\Zcrudgen\Generators\RouteGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ServiceGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\TestGenerator;
 
@@ -22,12 +23,21 @@ class ZcrudgenCommand extends Command
 
     public function handle(): int
     {
-        $name = $this->argument('name');
-        $relations = $this->option('relations');
-        $middleware = $this->option('middleware');
-        $usePermissions = $this->option('permissions');
-
         try {
+            $name = $this->argument('name');
+            if (empty($name)) {
+                $this->error('Name cannot be empty');
+
+                return self::FAILURE;
+            }
+
+            $relations = $this->option('relations');
+            $middleware = $this->option('middleware');
+            $usePermissions = $this->option('permissions');
+
+            // Create directories if they don't exist
+            $this->createDirectories();
+
             // Generate migration if needed
             $migrationGenerator = new MigrationGenerator;
             $migrationGenerator->generate($name);
@@ -45,15 +55,18 @@ class ZcrudgenCommand extends Command
             $this->generateController($name, $middleware, $usePermissions);
             $this->generateRequests($name, $columns);
             $this->generateResource($name, $columns);
-            $this->generateTests($name, $columns);
 
             // Generate route if needed
             $routeGenerator = new RouteGenerator;
             $routeGenerator->generate($name);
 
-            $this->info('CRUD generated successfully for '.$name.' model!');
+            $testGenerator = new TestGenerator();
+            $testGenerator->generate($name, $columns);
+
+            $this->info('CRUD generated successfully for ' . $name . ' model!');
 
             return self::SUCCESS;
+
         } catch (\Throwable $e) {
             $this->error($e->getMessage());
 
@@ -61,10 +74,25 @@ class ZcrudgenCommand extends Command
         }
     }
 
-    protected function generateTests(string $name, array $columns): void
+    protected function createDirectories(): void
     {
-        $generator = new TestGenerator;
-        $generator->generate($name, $columns);
+        $paths = [
+            app_path('Http/Controllers/API'),
+            app_path('Models'),
+            app_path('Services'),
+            app_path('Repositories'),
+            app_path('Repositories/Interfaces'),
+            app_path('Http/Resources'),
+            app_path('Http/Requests'),
+            base_path('routes'),
+            database_path('migrations'),
+        ];
+
+        foreach ($paths as $path) {
+            if (! is_dir($path)) {
+                mkdir($path, 0777, true);
+            }
+        }
     }
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
