@@ -13,7 +13,7 @@ class MigrationGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new MigrationGenerator;
+        $this->generator = new MigrationGenerator();
 
         // Clear migrations directory
         File::deleteDirectory(database_path('migrations'));

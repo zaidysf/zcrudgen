@@ -12,7 +12,7 @@ class RequestGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new RequestGenerator;
+        $this->generator = new RequestGenerator();
     }
 
     public function test_can_generate_create_and_update_requests(): void

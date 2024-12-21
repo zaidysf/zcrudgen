@@ -1,6 +1,12 @@
 {
     "name": "zaidysf/zcrudgen",
     "description": "Laravel CRUD API Generator with advanced features",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/zaidysf/zcrudgen"
+        }
+    ],
     "keywords": [
         "Zaid Yasyaf",
         "laravel",
