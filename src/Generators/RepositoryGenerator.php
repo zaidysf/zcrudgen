@@ -24,12 +24,12 @@ class RepositoryGenerator extends BaseGenerator
     protected function generateInterface(string $basePath, string $className): string
     {
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Repositories\\Interfaces',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Repositories\\Interfaces',
             '{{ class }}' => $className,
         ];
 
         $content = $this->generateClass('repository.interface', $replacements);
-        $path = $basePath . '/Interfaces/' . $className . 'RepositoryInterface.php';
+        $path = $basePath.'/Interfaces/'.$className.'RepositoryInterface.php';
 
         $this->put($path, $content);
 
@@ -39,13 +39,13 @@ class RepositoryGenerator extends BaseGenerator
     protected function generateRepository(string $basePath, string $className): string
     {
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Repositories',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Repositories',
             '{{ class }}' => $className,
-            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
         ];
 
         $content = $this->generateClass('repository.class', $replacements);
-        $path = $basePath . '/' . $className . 'Repository.php';
+        $path = $basePath.'/'.$className.'Repository.php';
 
         $this->put($path, $content);
 

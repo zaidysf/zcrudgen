@@ -1,4 +1,5 @@
 <?php
+
 namespace Examples\Blog;
 
 class PostService

@@ -24,7 +24,7 @@ class ZcrudgenCommand extends Command
         }
 
         // TODO: Implement generation logic
-        $this->info('CRUD generated successfully for ' . $name . ' model!');
+        $this->info('CRUD generated successfully for '.$name.' model!');
 
         return self::SUCCESS;
     }

@@ -8,16 +8,17 @@ use Illuminate\Support\Str;
 abstract class BaseGenerator
 {
     protected string $stubPath;
+
     protected array $replacements = [];
 
     public function __construct()
     {
-        $this->stubPath = __DIR__ . '/../../stubs/';
+        $this->stubPath = __DIR__.'/../../stubs/';
     }
 
     protected function getStub(string $type): string
     {
-        return File::get($this->stubPath . $type . '.stub');
+        return File::get($this->stubPath.$type.'.stub');
     }
 
     protected function makeDirectory(string $path): void

@@ -12,19 +12,19 @@ class ControllerGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Controllers\\API',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Controllers\\API',
             '{{ class }}' => $className,
-            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
-            '{{ service_namespace }}' => config('zcrudgen.namespace') . '\\Services\\' . $className . 'Service',
-            '{{ resource_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Resources\\' . $className . 'Resource',
-            '{{ request_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Requests',
+            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
+            '{{ service_namespace }}' => config('zcrudgen.namespace').'\\Services\\'.$className.'Service',
+            '{{ resource_namespace }}' => config('zcrudgen.namespace').'\\Http\\Resources\\'.$className.'Resource',
+            '{{ request_namespace }}' => config('zcrudgen.namespace').'\\Http\\Requests',
             '{{ route_prefix }}' => Str::kebab(Str::pluralStudly($name)),
             '{{ middleware }}' => $this->generateMiddleware($middleware, $usePermissions, $name),
             '{{ permissions }}' => $this->generatePermissions($usePermissions, $name),
         ];
 
         $content = $this->generateClass('controller', $replacements);
-        $path = $controllerPath . '/' . $className . 'Controller.php';
+        $path = $controllerPath.'/'.$className.'Controller.php';
 
         $this->put($path, $content);
 
@@ -47,7 +47,7 @@ class ControllerGenerator extends BaseGenerator
         }
 
         return empty($middlewares) ? '' :
-            "\$this->middleware(['" . implode("', '", $middlewares) . "']);";
+            "\$this->middleware(['".implode("', '", $middlewares)."']);";
     }
 
     protected function generatePermissionMiddleware(string $name): array

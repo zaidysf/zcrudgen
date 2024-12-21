@@ -23,7 +23,7 @@ class SwaggerGenerator extends BaseGenerator
         ];
 
         $content = $this->generateClass('swagger', $replacements);
-        $path = $docPath . '/' . Str::kebab($className) . '.yaml';
+        $path = $docPath.'/'.Str::kebab($className).'.yaml';
 
         $this->put($path, $content);
 
@@ -117,7 +117,7 @@ YAML;
                     return '2024-01-01T00:00:00Z';
                 }
 
-                return 'Example ' . Str::title(str_replace('_', ' ', $column));
+                return 'Example '.Str::title(str_replace('_', ' ', $column));
         }
     }
 }

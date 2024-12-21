@@ -15,21 +15,21 @@ class ServiceGenerator extends BaseGenerator
         // Get AI-generated logic if enabled
         $aiLogic = [];
         if (config('zcrudgen.ai.enabled', false)) {
-            $aiGenerator = new AiGenerator();
+            $aiGenerator = new AiGenerator;
             $aiLogic = $aiGenerator->generateBusinessLogic($name, $columns);
         }
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Services',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Services',
             '{{ class }}' => $className,
-            '{{ repository_interface }}' => config('zcrudgen.namespace') . '\\Repositories\\Interfaces\\' . $className . 'RepositoryInterface',
+            '{{ repository_interface }}' => config('zcrudgen.namespace').'\\Repositories\\Interfaces\\'.$className.'RepositoryInterface',
             '{{ traits }}' => $this->generateTraits($aiLogic['traits'] ?? []),
             '{{ methods }}' => $this->generateMethods($aiLogic['methods'] ?? []),
             '{{ imports }}' => $this->generateImports($aiLogic['imports'] ?? [], $className),
         ];
 
         $content = $this->generateClass('service', $replacements);
-        $path = $servicePath . '/' . $className . 'Service.php';
+        $path = $servicePath.'/'.$className.'Service.php';
 
         $this->makeDirectory(dirname($path));
         $this->put($path, $content);
@@ -51,9 +51,9 @@ class ServiceGenerator extends BaseGenerator
             return '';
         }
 
-        return 'use ' . implode(', ', array_map(function ($trait) {
-            return '\\' . ltrim($trait, '\\');
-        }, $traits)) . ';';
+        return 'use '.implode(', ', array_map(function ($trait) {
+            return '\\'.ltrim($trait, '\\');
+        }, $traits)).';';
     }
 
     /**
@@ -167,15 +167,15 @@ PHP;
             $eventClassName = $this->studlyCase($eventName);
 
             $replacements = [
-                '{{ namespace }}' => config('zcrudgen.namespace') . '\\Events',
+                '{{ namespace }}' => config('zcrudgen.namespace').'\\Events',
                 '{{ class }}' => $eventClassName,
                 '{{ model }}' => $className,
-                '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+                '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
                 '{{ model_variable }}' => $modelVariable,
             ];
 
             $content = $this->generateClass('event', $replacements);
-            $path = $eventPath . '/' . $eventClassName . '.php';
+            $path = $eventPath.'/'.$eventClassName.'.php';
 
             $this->makeDirectory(dirname($path));
             $this->put($path, $content);
@@ -195,7 +195,7 @@ PHP;
 
         if (! empty($imports)) {
             $imports = array_map(function ($import) {
-                return 'use ' . ltrim($import, '\\') . ';';
+                return 'use '.ltrim($import, '\\').';';
             }, $imports);
 
             return implode("\n", array_unique(array_merge($defaultImports, $imports)));

@@ -12,7 +12,7 @@ class ModelGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Models',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Models',
             '{{ class }}' => $className,
             '{{ fillable }}' => $this->generateFillable($columns),
             '{{ relations }}' => $this->generateRelations($relations),
@@ -20,7 +20,7 @@ class ModelGenerator extends BaseGenerator
         ];
 
         $content = $this->generateClass('model', $replacements);
-        $path = $modelPath . '/' . $className . '.php';
+        $path = $modelPath.'/'.$className.'.php';
 
         $this->put($path, $content);
 
@@ -52,7 +52,7 @@ class ModelGenerator extends BaseGenerator
             $relationMethods[] = $this->generateRelationMethod($relationName, $relationClass);
         }
 
-        return "\n    " . implode("\n\n    ", $relationMethods);
+        return "\n    ".implode("\n\n    ", $relationMethods);
     }
 
     protected function generateRelationMethod(string $name, string $class): string

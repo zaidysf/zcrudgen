@@ -191,13 +191,13 @@ return [
             'success' => [
                 'status' => 'success',
                 'message' => ':message',
-                'data' => ':data'
+                'data' => ':data',
             ],
             'error' => [
                 'status' => 'error',
                 'message' => ':message',
-                'errors' => ':errors'
-            ]
+                'errors' => ':errors',
+            ],
         ],
         'status_codes' => [
             'success' => 200,
@@ -208,7 +208,7 @@ return [
             'unauthorized' => 401,
             'forbidden' => 403,
             'not_found' => 404,
-        ]
+        ],
     ],
 
     /*

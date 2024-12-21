@@ -1,4 +1,5 @@
 <?php
+
 namespace Examples\Blog;
 
 class Post extends Model
@@ -9,7 +10,7 @@ class Post extends Model
         'category_id',
         'author_id',
         'status',
-        'published_at'
+        'published_at',
     ];
 
     public function category()

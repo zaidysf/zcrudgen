@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 class AiGenerator extends BaseGenerator
 {
     protected string $apiKey;
+
     protected string $model;
 
     public function __construct()
@@ -26,7 +27,7 @@ class AiGenerator extends BaseGenerator
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $this->model,
@@ -48,7 +49,7 @@ class AiGenerator extends BaseGenerator
             }
         } catch (\Exception $e) {
             // Log error but don't break the generation process
-            logger()->error('AI Generation failed: ' . $e->getMessage());
+            logger()->error('AI Generation failed: '.$e->getMessage());
         }
 
         return [];

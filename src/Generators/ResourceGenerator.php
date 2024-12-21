@@ -10,13 +10,13 @@ class ResourceGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Resources',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Resources',
             '{{ class }}' => $className,
             '{{ attributes }}' => $this->generateAttributes($columns),
         ];
 
         $content = $this->generateClass('resource', $replacements);
-        $path = $resourcePath . '/' . $className . 'Resource.php';
+        $path = $resourcePath.'/'.$className.'Resource.php';
 
         $this->put($path, $content);
 
