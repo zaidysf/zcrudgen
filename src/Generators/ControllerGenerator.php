@@ -211,7 +211,7 @@ PHP;
      */
     protected function getOpenApiType(string $column): string
     {
-        return match(true) {
+        return match (true) {
             $column === 'id' || str_ends_with($column, '_id') => 'integer',
             str_contains($column, 'is_') || str_contains($column, 'has_') => 'boolean',
             str_contains($column, 'price') || str_contains($column, 'amount') => 'number',
@@ -244,15 +244,14 @@ PHP;
      */
     protected function getOpenApiExample(string $column, string $type): string
     {
-        return match(true) {
+        return match (true) {
             $column === 'id' || str_ends_with($column, '_id') => '1',
             $column === 'email' => 'user@example.com',
             $column === 'name' => 'John Doe',
             $column === 'password' => '********',
             str_contains($column, 'price') => '99.99',
             str_contains($column, 'is_') || str_contains($column, 'has_') => 'true',
-            str_contains($column, 'date') || in_array($column, ['created_at', 'updated_at'])
-                => '2024-01-01T00:00:00Z',
+            str_contains($column, 'date') || in_array($column, ['created_at', 'updated_at']) => '2024-01-01T00:00:00Z',
             default => 'example'
         };
     }

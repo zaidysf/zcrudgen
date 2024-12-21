@@ -29,7 +29,7 @@ class ZcrudgenCommand extends Command
 
         try {
             // Generate migration if needed
-            $migrationGenerator = new MigrationGenerator();
+            $migrationGenerator = new MigrationGenerator;
             $migrationGenerator->generate($name);
 
             // Get table structure
@@ -48,10 +48,10 @@ class ZcrudgenCommand extends Command
             $this->generateTests($name, $columns);
 
             // Generate route if needed
-            $routeGenerator = new RouteGenerator();
+            $routeGenerator = new RouteGenerator;
             $routeGenerator->generate($name);
 
-            $this->info('CRUD generated successfully for ' . $name . ' model!');
+            $this->info('CRUD generated successfully for '.$name.' model!');
 
             return self::SUCCESS;
         } catch (\Throwable $e) {
@@ -63,43 +63,43 @@ class ZcrudgenCommand extends Command
 
     protected function generateTests(string $name, array $columns): void
     {
-        $generator = new TestGenerator();
+        $generator = new TestGenerator;
         $generator->generate($name, $columns);
     }
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
     {
-        $generator = new ModelGenerator();
+        $generator = new ModelGenerator;
         $generator->generate($name, $columns, $relations);
     }
 
     protected function generateRepository(string $name): void
     {
-        $generator = new RepositoryGenerator();
+        $generator = new RepositoryGenerator;
         $generator->generate($name);
     }
 
     protected function generateService(string $name, array $columns): void
     {
-        $generator = new ServiceGenerator();
+        $generator = new ServiceGenerator;
         $generator->generate($name, $columns);
     }
 
     protected function generateController(string $name, ?string $middleware, bool $usePermissions): void
     {
-        $generator = new ControllerGenerator();
+        $generator = new ControllerGenerator;
         $generator->generate($name, $middleware, $usePermissions);
     }
 
     protected function generateRequests(string $name, array $columns): void
     {
-        $generator = new RequestGenerator();
+        $generator = new RequestGenerator;
         $generator->generate($name, $columns);
     }
 
     protected function generateResource(string $name, array $columns): void
     {
-        $generator = new ResourceGenerator();
+        $generator = new ResourceGenerator;
         $generator->generate($name, $columns);
     }
 }
