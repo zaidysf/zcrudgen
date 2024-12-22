@@ -37,7 +37,7 @@ class RequestGenerator extends BaseGenerator
                 $columnRules[] = "exists:{$tableName},id";
             }
 
-            $rules[] = "'{$column}' => [" . implode(', ', array_map(fn ($rule) => "'$rule'", $columnRules)) . ']';
+            $rules[] = "'{$column}' => [".implode(', ', array_map(fn ($rule) => "'$rule'", $columnRules)).']';
         }
 
         return implode(",\n            ", $rules);
@@ -46,7 +46,7 @@ class RequestGenerator extends BaseGenerator
     protected function generateCreateRequest(string $name, array $columns, string $tableName): string
     {
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Requests',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Requests',
             '{{ class }}' => $name,
             '{{ rules }}' => $this->generateRules($columns, $tableName, false),
         ];
@@ -62,7 +62,7 @@ class RequestGenerator extends BaseGenerator
     protected function generateUpdateRequest(string $name, array $columns, string $tableName): string
     {
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Requests',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Requests',
             '{{ class }}' => $name,
             '{{ rules }}' => $this->generateRules($columns, $tableName, true),
         ];

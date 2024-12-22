@@ -11,7 +11,7 @@ class ModelGenerator extends BaseGenerator
         $tableName = Str::plural(Str::snake($name));
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Models',
+            '{{ namespace }}' => config('zcrudgen.namespace').'\\Models',
             '{{ class }}' => $name,
             '{{ table }}' => $tableName,
             '{{ fillable }}' => $this->generateFillable($columns),
@@ -39,8 +39,8 @@ class ModelGenerator extends BaseGenerator
             }
         }
 
-        return empty($casts) ? '' : "\n    protected \$casts = [\n        " .
-            implode(",\n        ", $casts) . "\n    ];";
+        return empty($casts) ? '' : "\n    protected \$casts = [\n        ".
+            implode(",\n        ", $casts)."\n    ];";
     }
 
     protected function hasTimestamps(array $columns): bool

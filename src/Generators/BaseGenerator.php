@@ -98,7 +98,7 @@ abstract class BaseGenerator
     {
         $type = $columnInfo['type'];
 
-        return match($type) {
+        return match ($type) {
             'bigint', 'integer', 'smallint' => [
                 'cast' => 'integer',
                 'validation' => ['integer'],
@@ -193,7 +193,7 @@ abstract class BaseGenerator
 
     protected function getDefaultColumnInfo(string $column): array
     {
-        return match($column) {
+        return match ($column) {
             'id' => [
                 'type' => 'integer',
                 'autoincrement' => true,

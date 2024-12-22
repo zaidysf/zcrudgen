@@ -109,6 +109,6 @@ class SwaggerGenerator extends BaseGenerator
             $schema[] = 'nullable: true';
         }
 
-        return "      {$column}:\n        " . implode("\n        ", $schema);
+        return "      {$column}:\n        ".implode("\n        ", $schema);
     }
 }
