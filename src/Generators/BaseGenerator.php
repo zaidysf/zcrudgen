@@ -2,6 +2,7 @@
 
 namespace ZaidYasyaf\Zcrudgen\Generators;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -78,22 +79,22 @@ abstract class BaseGenerator
             return $this->getDefaultColumnInfo($column);
         }
 
-        // Get the Doctrine connection
-        $doctrineConnection = Schema::getConnection()->getDoctrineConnection();
+        // Get the Doctrine DBAL connection
+        $doctrineConnection = DB::connection()->getDoctrineConnection();
 
-        // Get the schema manager (compatible with newer Doctrine versions)
+        // Get the schema manager
         $schemaManager = $doctrineConnection->createSchemaManager();
 
-        // Fetch table details
-        $tableDetails = $schemaManager->listTableColumns($tableName);
+        // List table columns
+        $tableColumns = $schemaManager->listTableColumns($tableName);
 
         // Check if the column exists
-        if (! isset($tableDetails[$column])) {
+        if (! isset($tableColumns[$column])) {
             return $this->getDefaultColumnInfo($column);
         }
 
-        // Get the column details
-        $doctrineColumn = $tableDetails[$column];
+        // Get the column information
+        $doctrineColumn = $tableColumns[$column];
 
         return [
             'type' => $doctrineColumn->getType()->getName(),
