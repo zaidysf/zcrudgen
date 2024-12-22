@@ -77,25 +77,10 @@ This package relies on the following packages:
 
 ## Installation
 
-1. Install the package via composer:
+Install the package via composer:
 ```bash
 composer require zaidysf/zcrudgen
 php artisan vendor:publish --provider="ZaidYasyaf\Zcrudgen\ZcrudgenServiceProvider"
-```
-
-2. Add Scramble route in your routes/web.php:
-```php
-Route::scramble();
-```
-
-3. Publish Scramble config (optional):
-```bash
-php artisan vendor:publish --tag=scramble-config
-```
-
-4. Access your API documentation at:
-```
-http://your-app-url/docs/api
 ```
 
 ## Configuration
