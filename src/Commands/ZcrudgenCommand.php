@@ -72,16 +72,16 @@ class ZcrudgenCommand extends Command
     private function getGenerators(string $name, array $columns, ?string $relations, ?string $middleware, bool $usePermissions): array
     {
         return [
-            'Migration' => fn () => (new MigrationGenerator)->generate($name),
-            'Model' => fn () => (new ModelGenerator)->generate($name, $columns, $relations),
-            'Repository' => fn () => (new RepositoryGenerator)->generate($name),
-            'Service' => fn () => (new ServiceGenerator)->generate($name, $columns),
-            'Controller' => fn () => (new ControllerGenerator)->generate($name, $middleware, $usePermissions),
-            'Requests' => fn () => (new RequestGenerator)->generate($name, $columns),
-            'Resource' => fn () => (new ResourceGenerator)->generate($name, $columns),
-            'Routes' => fn () => (new RouteGenerator)->generate($name),
-            'Tests' => fn () => (new TestGenerator)->generate($name, $columns),
-            'Swagger' => fn () => (new SwaggerGenerator)->generate($name, $columns),
+            'Migration' => fn () => (new MigrationGenerator())->generate($name),
+            'Model' => fn () => (new ModelGenerator())->generate($name, $columns, $relations),
+            'Repository' => fn () => (new RepositoryGenerator())->generate($name),
+            'Service' => fn () => (new ServiceGenerator())->generate($name, $columns),
+            'Controller' => fn () => (new ControllerGenerator())->generate($name, $middleware, $usePermissions),
+            'Requests' => fn () => (new RequestGenerator())->generate($name, $columns),
+            'Resource' => fn () => (new ResourceGenerator())->generate($name, $columns),
+            'Routes' => fn () => (new RouteGenerator())->generate($name),
+            'Tests' => fn () => (new TestGenerator())->generate($name, $columns),
+            'Swagger' => fn () => (new SwaggerGenerator())->generate($name, $columns),
         ];
     }
 
