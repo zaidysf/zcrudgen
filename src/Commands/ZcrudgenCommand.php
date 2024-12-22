@@ -87,37 +87,37 @@ class ZcrudgenCommand extends Command
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
     {
-        $generator = new ModelGenerator;
+        $generator = new ModelGenerator();
         $generator->generate($name, $columns, $relations);
     }
 
     protected function generateRepository(string $name): void
     {
-        $generator = new RepositoryGenerator;
+        $generator = new RepositoryGenerator();
         $generator->generate($name);
     }
 
     protected function generateService(string $name, array $columns): void
     {
-        $generator = new ServiceGenerator;
+        $generator = new ServiceGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateController(string $name, ?string $middleware, bool $usePermissions): void
     {
-        $generator = new ControllerGenerator;
+        $generator = new ControllerGenerator();
         $generator->generate($name, $middleware, $usePermissions);
     }
 
     protected function generateRequests(string $name, array $columns): void
     {
-        $generator = new RequestGenerator;
+        $generator = new RequestGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateResource(string $name, array $columns): void
     {
-        $generator = new ResourceGenerator;
+        $generator = new ResourceGenerator();
         $generator->generate($name, $columns);
     }
 }
