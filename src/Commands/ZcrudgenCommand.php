@@ -17,30 +17,37 @@ use ZaidYasyaf\Zcrudgen\Generators\TestGenerator;
 
 class ZcrudgenCommand extends Command
 {
-    protected $signature = 'zcrudgen:make {name} {--relations=} {--middleware=} {--permissions}';
+    protected $signature = 'zcrudgen:make {name?} {--relations=} {--middleware=} {--permissions}';
 
     protected $description = 'Generate CRUD API with advanced features';
 
     public function handle(): int
     {
         try {
-            $name = $this->argument('name');
-            if (empty($name)) {
-                $this->error('Name cannot be empty');
+            $this->info('Welcome to ZCrudGen! 🚀');
+            $this->info('Let\'s create your CRUD API...');
 
-                return self::FAILURE;
+            // Get model name
+            $name = $this->argument('name');
+            if (! $name) {
+                $name = $this->ask('What is the name of your model?');
+                if (empty($name)) {
+                    $this->error('Model name is required.');
+
+                    return self::FAILURE;
+                }
             }
 
+            $this->info("Generating CRUD for model: {$name}");
+            $this->info('Base path: ' . app()->basePath());
+
+            // Get configurations
             $relations = $this->option('relations');
             $middleware = $this->option('middleware');
             $usePermissions = $this->option('permissions');
 
-            // Create directories if they don't exist
+            // Create directories first
             $this->createDirectories();
-
-            // Generate migration if needed
-            $migrationGenerator = new MigrationGenerator;
-            $migrationGenerator->generate($name);
 
             // Get table structure
             $tableName = Str::plural(Str::snake($name));
@@ -48,86 +55,107 @@ class ZcrudgenCommand extends Command
                 ? Schema::getColumnListing($tableName)
                 : ['id', 'name', 'created_at', 'updated_at'];
 
-            // Generate all components
-            $this->generateModel($name, $columns, $relations);
-            $this->generateRepository($name);
-            $this->generateService($name, $columns);
-            $this->generateController($name, $middleware, $usePermissions);
-            $this->generateRequests($name, $columns);
-            $this->generateResource($name, $columns);
+            $steps = [
+                'Migration' => fn () => $this->executeSafely('Migration', fn () => (new MigrationGenerator())->generate($name)),
+                'Model' => fn () => $this->executeSafely('Model', fn () => $this->generateModel($name, $columns, $relations)),
+                'Repository' => fn () => $this->executeSafely('Repository', fn () => $this->generateRepository($name)),
+                'Service' => fn () => $this->executeSafely('Service', fn () => $this->generateService($name, $columns)),
+                'Controller' => fn () => $this->executeSafely('Controller', fn () => $this->generateController($name, $middleware, $usePermissions)),
+                'Requests' => fn () => $this->executeSafely('Requests', fn () => $this->generateRequests($name, $columns)),
+                'Resource' => fn () => $this->executeSafely('Resource', fn () => $this->generateResource($name, $columns)),
+                'Routes' => fn () => $this->executeSafely('Routes', fn () => (new RouteGenerator())->generate($name)),
+                'Tests' => fn () => $this->executeSafely('Tests', fn () => (new TestGenerator())->generate($name, $columns)),
+            ];
 
-            // Generate route if needed
-            $routeGenerator = new RouteGenerator;
-            $routeGenerator->generate($name);
+            foreach ($steps as $step => $callback) {
+                $this->info("Generating {$step}...");
+                $callback();
+            }
 
-            $testGenerator = new TestGenerator;
-            $testGenerator->generate($name, $columns);
-
-            $this->info('CRUD generated successfully for '.$name.' model!');
+            $this->info('CRUD generated successfully!');
 
             return self::SUCCESS;
 
         } catch (\Throwable $e) {
-            $this->error($e->getMessage());
+            $this->error('Critical error: ' . $e->getMessage());
+            $this->error('Stack trace:');
+            $this->error($e->getTraceAsString());
 
             return self::FAILURE;
         }
     }
 
-    protected function createDirectories(): void
+    private function executeSafely(string $step, callable $callback): mixed
+    {
+        try {
+            return $callback();
+        } catch (\Throwable $e) {
+            $this->error("Error in {$step} generation:");
+            $this->error($e->getMessage());
+            $this->error("Stack trace for {$step}:");
+            $this->error($e->getTraceAsString());
+
+            throw $e;
+        }
+    }
+
+    private function createDirectories(): void
     {
         $paths = [
-            app_path('Http/Controllers/API'),
-            app_path('Models'),
-            app_path('Services'),
-            app_path('Repositories'),
-            app_path('Repositories/Interfaces'),
-            app_path('Http/Resources'),
-            app_path('Http/Requests'),
-            base_path('routes'),
-            database_path('migrations'),
+            'app/Http/Controllers/API',
+            'app/Models',
+            'app/Services',
+            'app/Repositories',
+            'app/Repositories/Interfaces',
+            'app/Http/Resources',
+            'app/Http/Requests',
+            'tests/Feature/Api',
         ];
 
         foreach ($paths as $path) {
-            if (! is_dir($path)) {
-                mkdir($path, 0777, true);
+            $fullPath = app()->basePath($path);
+            if (! is_dir($fullPath)) {
+                $this->info("Creating directory: {$fullPath}");
+                if (! mkdir($fullPath, 0777, true)) {
+                    throw new \RuntimeException("Failed to create directory: {$fullPath}");
+                }
             }
         }
     }
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
     {
-        $generator = new ModelGenerator;
+        $generator = new ModelGenerator();
         $generator->generate($name, $columns, $relations);
     }
 
     protected function generateRepository(string $name): void
     {
-        $generator = new RepositoryGenerator;
+        $generator = new RepositoryGenerator();
         $generator->generate($name);
     }
 
     protected function generateService(string $name, array $columns): void
     {
-        $generator = new ServiceGenerator;
+        $generator = new ServiceGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateController(string $name, ?string $middleware, bool $usePermissions): void
     {
-        $generator = new ControllerGenerator;
+        $generator = new ControllerGenerator();
         $generator->generate($name, $middleware, $usePermissions);
     }
 
     protected function generateRequests(string $name, array $columns): void
     {
-        $generator = new RequestGenerator;
+        $generator = new RequestGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateResource(string $name, array $columns): void
     {
-        $generator = new ResourceGenerator;
+        $generator = new ResourceGenerator();
         $generator->generate($name, $columns);
     }
 }

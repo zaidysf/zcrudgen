@@ -2,6 +2,7 @@
 
 namespace ZaidYasyaf\Zcrudgen\Generators;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class ControllerGenerator extends BaseGenerator
@@ -12,23 +13,63 @@ class ControllerGenerator extends BaseGenerator
         $className = $this->studlyCase($name);
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace').'\\Http\\Controllers\\API',
+            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Http\\Controllers\\API',
             '{{ class }}' => $className,
-            '{{ model_namespace }}' => config('zcrudgen.namespace').'\\Models\\'.$className,
-            '{{ service_namespace }}' => config('zcrudgen.namespace').'\\Services\\'.$className.'Service',
-            '{{ resource_namespace }}' => config('zcrudgen.namespace').'\\Http\\Resources\\'.$className.'Resource',
-            '{{ request_namespace }}' => config('zcrudgen.namespace').'\\Http\\Requests',
+            '{{ model_namespace }}' => config('zcrudgen.namespace') . '\\Models\\' . $className,
+            '{{ service_namespace }}' => config('zcrudgen.namespace') . '\\Services\\' . $className . 'Service',
+            '{{ resource_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Resources\\' . $className . 'Resource',
+            '{{ request_namespace }}' => config('zcrudgen.namespace') . '\\Http\\Requests',
             '{{ route_prefix }}' => Str::plural(Str::kebab($name)),
             '{{ middleware }}' => $this->generateMiddleware($middleware, $usePermissions, $name),
             '{{ permissions }}' => $this->generatePermissions($usePermissions, $name),
         ];
 
         $content = $this->generateClass('controller', $replacements);
-        $path = $controllerPath.'/'.$className.'Controller.php';
+        $path = $controllerPath . '/' . $className . 'Controller.php';
 
         $this->put($path, $content);
 
+        // Bind interface in AppServiceProvider
+        $this->updateAppServiceProvider($name);
+
         return $path;
+    }
+
+    protected function updateAppServiceProvider(string $name): void
+    {
+        $path = app_path('Providers/AppServiceProvider.php');
+
+        if (! File::exists($path)) {
+            return; // Skip if provider doesn't exist
+        }
+
+        $content = File::get($path);
+
+        $bindStatement = "\n\t\t\$this->app->bind(\\App\\Repositories\\Interfaces\\{$name}RepositoryInterface::class, \\App\\Repositories\\{$name}Repository::class);";
+
+        // Check if binding already exists
+        if (str_contains($content, $bindStatement)) {
+            return;
+        }
+
+        // Find the register method
+        if (str_contains($content, 'public function register()')) {
+            // Add binding after register method opening brace
+            $content = preg_replace(
+                '/(public function register\(\)[\s\n]*{)/',
+                "$1{$bindStatement}",
+                $content
+            );
+        } else {
+            // Add register method with binding
+            $content = str_replace(
+                'class AppServiceProvider extends ServiceProvider',
+                "class AppServiceProvider extends ServiceProvider\n{\n\tpublic function register()\n\t{{$bindStatement}\n\t}",
+                $content
+            );
+        }
+
+        File::put($path, $content);
     }
 
     protected function generateMiddleware(?string $middleware, bool $usePermissions, string $name): string

@@ -10,88 +10,135 @@ class TestCase extends Orchestra
 {
     protected function setUp(): void
     {
+        // Create base directories first using native PHP functions
+        $this->createBaseDirectories();
+
         parent::setUp();
 
-        $this->createTestDirectories();
-        $this->setUpDatabase();
-        $this->copyStubs();
-        $this->createInitialRoutes();
+        // Now we can use Laravel's features
+        $this->createAppServiceProvider();
+        $this->createBaseRoutes();
     }
 
-    protected function createInitialRoutes(): void
+    protected function createBaseDirectories(): void
     {
-        $routePath = base_path('routes/api.php');
+        $basePath = __DIR__.'/TestApp';
 
-        if (! File::exists($routePath)) {
+        $paths = [
+            $basePath . '/app/Http/Controllers/API',
+            $basePath . '/app/Models',
+            $basePath . '/app/Services',
+            $basePath . '/app/Repositories',
+            $basePath . '/app/Repositories/Interfaces',
+            $basePath . '/app/Http/Resources',
+            $basePath . '/app/Http/Requests',
+            $basePath . '/app/Providers',
+            $basePath . '/tests/Feature/Api',
+            $basePath . '/routes',
+            $basePath . '/bootstrap/cache',
+        ];
+
+        foreach ($paths as $path) {
+            if (! is_dir($path)) {
+                mkdir($path, 0777, true);
+            }
+        }
+    }
+
+    protected function createAppServiceProvider(): void
+    {
+        $providerPath = $this->app->basePath('app/Providers/AppServiceProvider.php');
+
+        if (! file_exists($providerPath)) {
             $content = <<<PHP
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register()
+    {
+        //
+    }
+
+    public function boot()
+    {
+        //
+    }
+}
+PHP;
+            file_put_contents($providerPath, $content);
+        }
+    }
+
+    protected function createBaseRoutes(): void
+    {
+        $routePath = $this->app->basePath('routes/api.php');
+
+        if (! file_exists($routePath)) {
+            $content = <<<'PHP'
 <?php
 
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'api'], function () {
-    // API routes will be added here
+Route::prefix('api')->group(function () {
+    // API Routes will be added here
 });
+
 PHP;
-            File::put($routePath, $content);
-        }
-
-        // Load the routes
-        require $routePath;
-    }
-
-    protected function copyStubs(): void
-    {
-        $stubsPath = __DIR__.'/../stubs';
-        $testStubsPath = __DIR__.'/stubs';
-
-        if (! File::isDirectory($testStubsPath)) {
-            File::copyDirectory($stubsPath, $testStubsPath);
-        }
-    }
-
-    protected function createTestDirectories(): void
-    {
-        $paths = [
-            app_path('Http/Controllers/API'),
-            app_path('Models'),
-            app_path('Services'),
-            app_path('Repositories'),
-            app_path('Repositories/Interfaces'),
-            app_path('Http/Resources'),
-            app_path('Http/Requests'),
-            base_path('routes'),
-            database_path('migrations'),
-            base_path('tests/Feature/Api'),
-        ];
-
-        foreach ($paths as $path) {
-            if (! File::isDirectory($path)) {
-                File::makeDirectory($path, 0777, true);
-            }
-        }
-
-        // Create routes file if it doesn't exist
-        if (! File::exists(base_path('routes/api.php'))) {
-            File::put(
-                base_path('routes/api.php'),
-                "<?php\n\nuse Illuminate\Support\Facades\Route;\n"
-            );
+            file_put_contents($routePath, $content);
         }
     }
 
     protected function getEnvironmentSetUp($app): void
     {
-        config()->set('database.default', 'testing');
+        // Set the app base path
+        $app->setBasePath($this->getBasePath());
 
-        config()->set('zcrudgen.paths', [
-            'model' => app_path('Models'),
-            'controller' => app_path('Http/Controllers/API'),
-            'repository' => app_path('Repositories'),
-            'service' => app_path('Services'),
-            'resource' => app_path('Http/Resources'),
-            'request' => app_path('Http/Requests'),
-            'test' => base_path('tests/Feature/Api'),
+        // Configure database
+        config()->set('database.default', 'testing');
+        config()->set('database.connections.testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
         ]);
+    }
+
+    protected function getBasePath(): string
+    {
+        return __DIR__.'/TestApp';
+    }
+
+    protected function tearDown(): void
+    {
+        $this->deleteDirectory($this->getBasePath());
+        parent::tearDown();
+    }
+
+    protected function deleteDirectory(string $path): void
+    {
+        if (! is_dir($path)) {
+            return;
+        }
+
+        $items = scandir($path);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $fullPath = $path . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($fullPath)) {
+                $this->deleteDirectory($fullPath);
+            } else {
+                unlink($fullPath);
+            }
+        }
+
+        rmdir($path);
     }
 
     protected function getPackageProviders($app): array
@@ -104,21 +151,7 @@ PHP;
     protected function makeDirectory(string $path): void
     {
         if (! File::isDirectory($path)) {
-            File::makeDirectory($path, 0777, true, true);
+            File::makeDirectory($path, 0777, true);
         }
-    }
-
-    protected function cleanDirectory(string $path): void
-    {
-        if (! File::isDirectory($path)) {
-            return;
-        }
-
-        File::cleanDirectory($path);
-    }
-
-    protected function setUpDatabase(): void
-    {
-        // Add any database setup if needed
     }
 }

@@ -12,7 +12,10 @@ class ZcrudgenServiceProvider extends PackageServiceProvider
         $package
             ->name('zcrudgen')
             ->hasConfigFile()
-            ->hasCommand(Commands\ZcrudgenCommand::class);
+            ->hasCommands([
+                Commands\ZcrudgenCommand::class,
+                Commands\SetupCommand::class,
+            ]);
     }
 
     public function packageBooted(): void
