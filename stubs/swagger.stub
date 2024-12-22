@@ -4,16 +4,16 @@ info:
   version: 1.0.0
 
 paths:
-  /api/{{ route_prefix }}:
+  /api/{{ table }}:
     get:
       tags:
         - {{ class }}
-      summary: List all {{ route_prefix }}
+      summary: List all {{ table }}
       parameters:
 {{ parameters }}
       responses:
         200:
-          description: Successful operation
+          description: Success
           content:
             application/json:
               schema:
@@ -23,66 +23,35 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/{{ class }}'
+
     post:
       tags:
         - {{ class }}
-      summary: Create a new {{ class }}
+      summary: Create new {{ class }}
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Create{{ class }}'
+              $ref: '#/components/schemas/{{ class }}Input'
       responses:
         201:
           description: Created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/{{ class }}'
 
-  /api/{{ route_prefix }}/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
+  /api/{{ table }}/{id}:
     get:
       tags:
         - {{ class }}
-      summary: Get a specific {{ class }}
+      summary: Get specific {{ class }}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/{{ class }}'
-    put:
-      tags:
-        - {{ class }}
-      summary: Update a {{ class }}
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Update{{ class }}'
-      responses:
-        200:
-          description: Updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/{{ class }}'
-    delete:
-      tags:
-        - {{ class }}
-      summary: Delete a {{ class }}
-      responses:
-        200:
-          description: Deleted successfully
+          description: Success
 
 components:
   schemas:
@@ -91,12 +60,9 @@ components:
       properties:
 {{ properties }}
 
-    Create{{ class }}:
+    {{ class }}Input:
       type: object
-      properties:
-{{ properties }}
-
-    Update{{ class }}:
-      type: object
+      required:
+        - name
       properties:
 {{ properties }}

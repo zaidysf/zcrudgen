@@ -8,23 +8,44 @@ class ModelGenerator extends BaseGenerator
 {
     public function generate(string $name, array $columns, ?string $relations = null): string
     {
-        $modelPath = config('zcrudgen.paths.model', app_path('Models'));
-        $className = $this->studlyCase($name);
+        $tableName = Str::plural(Str::snake($name));
 
         $replacements = [
-            '{{ namespace }}' => config('zcrudgen.namespace').'\\Models',
-            '{{ class }}' => $className,
+            '{{ namespace }}' => config('zcrudgen.namespace') . '\\Models',
+            '{{ class }}' => $name,
+            '{{ table }}' => $tableName,
             '{{ fillable }}' => $this->generateFillable($columns),
+            '{{ casts }}' => $this->generateCasts($columns, $tableName),
+            '{{ timestamps }}' => $this->hasTimestamps($columns) ? '' : "\n    public \$timestamps = false;",
             '{{ relations }}' => $this->generateRelations($relations),
-            '{{ table }}' => Str::snake(Str::pluralStudly($name)),
         ];
 
         $content = $this->generateClass('model', $replacements);
-        $path = $modelPath.'/'.$className.'.php';
+        $path = app_path("Models/{$name}.php");
 
         $this->put($path, $content);
 
         return $path;
+    }
+
+    protected function generateCasts(array $columns, string $tableName): string
+    {
+        $casts = [];
+        foreach ($columns as $column) {
+            $info = $this->getColumnInfo($tableName, $column);
+            $definition = $this->getColumnDefinition($column, $info);
+            if ($definition['cast']) {
+                $casts[] = "'{$column}' => '{$definition['cast']}'";
+            }
+        }
+
+        return empty($casts) ? '' : "\n    protected \$casts = [\n        " .
+            implode(",\n        ", $casts) . "\n    ];";
+    }
+
+    protected function hasTimestamps(array $columns): bool
+    {
+        return in_array('created_at', $columns) && in_array('updated_at', $columns);
     }
 
     protected function generateFillable(array $columns): string

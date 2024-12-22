@@ -15,13 +15,7 @@ class ZcrudgenCommandTest extends TestCase
 
     public function test_command_exists(): void
     {
-        $this->artisan('zcrudgen:make')
-            ->expectsQuestion('What is the name of your model?', 'User')
-            // ->expectsConfirmation('Do you want to add relationships?', false)
-            // ->expectsChoice('Select middleware to use', 'auth:sanctum', ['auth:sanctum', 'auth:api', 'auth', 'none'])
-            // ->expectsConfirmation('Do you want to add permissions?', false)
-            // ->expectsConfirmation('Do you want to proceed?', true)
-            ->assertSuccessful();
+        $this->artisan('zcrudgen:make User')->assertSuccessful();
     }
 
     public function test_can_generate_crud_for_simple_model(): void

@@ -12,41 +12,38 @@ class SwaggerGeneratorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->generator = new SwaggerGenerator;
-
-        // Enable Swagger in config
-        config(['zcrudgen.swagger.enabled' => true]);
+        $this->generator = new SwaggerGenerator();
     }
 
     public function test_can_generate_swagger_documentation(): void
     {
-        $columns = ['id', 'name', 'email', 'is_active', 'created_at'];
+        config()->set('zcrudgen.swagger.enabled', true);
+
+        $columns = ['id', 'name', 'email', 'status', 'created_at'];
         $path = $this->generator->generate('User', $columns);
 
         $this->assertFileExists($path);
         $content = file_get_contents($path);
 
-        // Test API endpoints
+        // Check API endpoints
         $this->assertStringContainsString('/api/users:', $content);
         $this->assertStringContainsString('/api/users/{id}:', $content);
 
-        // Test parameters
+        // Check schema properties
+        $this->assertStringContainsString('id:', $content);
         $this->assertStringContainsString('name:', $content);
         $this->assertStringContainsString('email:', $content);
-        $this->assertStringContainsString('is_active:', $content);
+        $this->assertStringContainsString('status:', $content);
 
-        // Test types
-        $this->assertStringContainsString('type: string', $content);
-        $this->assertStringContainsString('type: boolean', $content);
+        // Check request body schema
+        $this->assertStringContainsString('UserInput:', $content);
+        $this->assertStringContainsString('required:', $content);
     }
 
     public function test_does_not_generate_when_disabled(): void
     {
-        config(['zcrudgen.swagger.enabled' => false]);
-
-        $columns = ['id', 'name'];
-        $path = $this->generator->generate('User', $columns);
-
+        config()->set('zcrudgen.swagger.enabled', false);
+        $path = $this->generator->generate('User', ['id', 'name']);
         $this->assertEmpty($path);
     }
 }

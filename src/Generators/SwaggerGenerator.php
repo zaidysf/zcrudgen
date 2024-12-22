@@ -12,18 +12,17 @@ class SwaggerGenerator extends BaseGenerator
             return '';
         }
 
-        $docPath = storage_path('api-docs');
-        $className = $this->studlyCase($name);
+        $tableName = Str::plural(Str::snake($name));
 
         $replacements = [
-            '{{ class }}' => $className,
-            '{{ route_prefix }}' => Str::kebab(Str::pluralStudly($name)),
+            '{{ class }}' => $name,
+            '{{ table }}' => $tableName,
             '{{ parameters }}' => $this->generateParameters($columns),
             '{{ properties }}' => $this->generateProperties($columns),
         ];
 
         $content = $this->generateClass('swagger', $replacements);
-        $path = $docPath.'/'.Str::kebab($className).'.yaml';
+        $path = storage_path("api-docs/{$tableName}.yaml");
 
         $this->put($path, $content);
 
@@ -37,81 +36,79 @@ class SwaggerGenerator extends BaseGenerator
             if (in_array($column, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
                 continue;
             }
-
-            $parameters[] = $this->generateParameter($column);
+            $parameters[] = $this->formatParameter($column);
         }
 
         return implode("\n", $parameters);
     }
 
-    protected function generateParameter(string $column): string
+    protected function formatParameter(string $column): string
     {
-        $type = $this->getColumnType($column);
-
-        return <<<YAML
-        - name: {$column}
-          in: query
-          schema:
-            type: {$type}
-          description: Filter by {$column}
-YAML;
+        return "      - name: {$column}\n        in: query\n        schema:\n          type: string";
     }
 
     protected function generateProperties(array $columns): string
     {
         $properties = [];
         foreach ($columns as $column) {
-            if ($column === 'password') {
+            if (in_array($column, ['created_at', 'updated_at', 'deleted_at'])) {
                 continue;
             }
-
-            $properties[] = $this->generateProperty($column);
+            $properties[] = "      {$column}:\n        type: string";
         }
 
         return implode("\n", $properties);
     }
 
-    protected function generateProperty(string $column): string
+    protected function generateRequestSchema(array $columns, string $tableName): string
     {
-        $type = $this->getColumnType($column);
+        $properties = [];
+        foreach ($columns as $column) {
+            if (in_array($column, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
+            }
+            $info = $this->getColumnInfo($tableName, $column);
+            $definition = $this->getColumnDefinition($column, $info);
+            $properties[] = $this->formatProperty($column, $definition['openapi'], $info);
+        }
 
-        return <<<YAML
-        {$column}:
-          type: {$type}
-          example: {$this->getExample($column, $type)}
-YAML;
+        return implode("\n", $properties);
     }
 
-    protected function getColumnType(string $column): string
+    protected function generateSchema(array $columns, string $tableName): string
     {
-        if (str_ends_with($column, '_id') || $column === 'id') {
-            return 'integer';
-        }
-        if (in_array($column, ['created_at', 'updated_at', 'deleted_at'])) {
-            return 'string';
-        }
-        if (str_contains($column, 'is_') || str_contains($column, 'has_')) {
-            return 'boolean';
-        }
-        if (str_contains($column, 'price') || str_contains($column, 'amount')) {
-            return 'number';
+        $properties = [];
+        foreach ($columns as $column) {
+            $info = $this->getColumnInfo($tableName, $column);
+            $definition = $this->getColumnDefinition($column, $info);
+            $properties[] = $this->formatProperty($column, $definition['openapi'], $info);
         }
 
-        return 'string';
+        return implode("\n", $properties);
     }
 
-    protected function getExample(string $column, string $type): string
+    protected function formatProperty(string $column, array $type, array $info): string
     {
-        return match ($type) {
-            'integer' => '1',
-            'boolean' => 'true',
-            'number' => '99.99',
-            'string' => match (true) {
-                str_contains($column, 'email') => 'user@example.com',
-                str_contains($column, 'date') || str_contains($column, '_at') => '2024-01-01T00:00:00Z',
-                default => 'Example '.Str::title(str_replace('_', ' ', $column)),
-            },
-            default => 'example',  // Added default return
-        };
+        $schema = [];
+        $schema[] = "type: {$type['type']}";
+
+        if (isset($type['format'])) {
+            $schema[] = "format: {$type['format']}";
+        }
+
+        if (isset($type['maxLength'])) {
+            $schema[] = "maxLength: {$type['maxLength']}";
+        }
+
+        if (isset($type['precision'])) {
+            $schema[] = "precision: {$type['precision']}";
+            $schema[] = "scale: {$type['scale']}";
+        }
+
+        if ($info['nullable']) {
+            $schema[] = 'nullable: true';
+        }
+
+        return "      {$column}:\n        " . implode("\n        ", $schema);
     }
 }

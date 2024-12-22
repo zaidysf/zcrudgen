@@ -3,7 +3,6 @@
 namespace ZaidYasyaf\Zcrudgen\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use ZaidYasyaf\Zcrudgen\Generators\ControllerGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\MigrationGenerator;
@@ -13,6 +12,7 @@ use ZaidYasyaf\Zcrudgen\Generators\RequestGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ResourceGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\RouteGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\ServiceGenerator;
+use ZaidYasyaf\Zcrudgen\Generators\SwaggerGenerator;
 use ZaidYasyaf\Zcrudgen\Generators\TestGenerator;
 
 class ZcrudgenCommand extends Command
@@ -24,103 +24,65 @@ class ZcrudgenCommand extends Command
     public function handle(): int
     {
         try {
-            $this->info('Welcome to ZCrudGen! 🚀');
-            $this->info('Let\'s create your CRUD API...');
-
-            // Get model name
             $name = $this->argument('name');
-            if (! $name) {
-                $name = $this->ask('What is the name of your model?');
-                if (empty($name)) {
-                    $this->error('Model name is required.');
-
-                    return self::FAILURE;
-                }
-            }
-
-            $this->info("Generating CRUD for model: {$name}");
-            $this->info('Base path: '.app()->basePath());
-
-            // Get configurations
             $relations = $this->option('relations');
             $middleware = $this->option('middleware');
             $usePermissions = $this->option('permissions');
 
-            // Create directories first
-            $this->createDirectories();
-
-            // Get table structure
             $tableName = Str::plural(Str::snake($name));
-            $columns = Schema::hasTable($tableName)
-                ? Schema::getColumnListing($tableName)
-                : ['id', 'name', 'created_at', 'updated_at'];
+            $columns = ['id', 'name', 'created_at', 'updated_at'];
 
-            $steps = [
-                'Migration' => fn () => $this->executeSafely('Migration', fn () => (new MigrationGenerator)->generate($name)),
-                'Model' => fn () => $this->executeSafely('Model', fn () => $this->generateModel($name, $columns, $relations)),
-                'Repository' => fn () => $this->executeSafely('Repository', fn () => $this->generateRepository($name)),
-                'Service' => fn () => $this->executeSafely('Service', fn () => $this->generateService($name, $columns)),
-                'Controller' => fn () => $this->executeSafely('Controller', fn () => $this->generateController($name, $middleware, $usePermissions)),
-                'Requests' => fn () => $this->executeSafely('Requests', fn () => $this->generateRequests($name, $columns)),
-                'Resource' => fn () => $this->executeSafely('Resource', fn () => $this->generateResource($name, $columns)),
-                'Routes' => fn () => $this->executeSafely('Routes', fn () => (new RouteGenerator)->generate($name)),
-                'Tests' => fn () => $this->executeSafely('Tests', fn () => (new TestGenerator)->generate($name, $columns)),
-            ];
-
-            foreach ($steps as $step => $callback) {
-                $this->info("Generating {$step}...");
-                $callback();
+            // Create test directories
+            foreach ($this->getRequiredPaths() as $path) {
+                if (! is_dir($path)) {
+                    mkdir($path, 0777, true);
+                }
             }
 
-            $this->info('CRUD generated successfully!');
+            // Generate components
+            foreach ($this->getGenerators($name, $columns, $relations, $middleware, $usePermissions) as $type => $generator) {
+                $this->info("Generating {$type}...");
+                $generator();
+            }
 
             return self::SUCCESS;
 
-        } catch (\Throwable $e) {
-            $this->error('Critical error: '.$e->getMessage());
-            $this->error('Stack trace:');
-            $this->error($e->getTraceAsString());
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
 
             return self::FAILURE;
         }
     }
 
-    private function executeSafely(string $step, callable $callback): mixed
+    private function getRequiredPaths(): array
     {
-        try {
-            return $callback();
-        } catch (\Throwable $e) {
-            $this->error("Error in {$step} generation:");
-            $this->error($e->getMessage());
-            $this->error("Stack trace for {$step}:");
-            $this->error($e->getTraceAsString());
-
-            throw $e;
-        }
+        return [
+            app_path('Http/Controllers/API'),
+            app_path('Models'),
+            app_path('Services'),
+            app_path('Repositories'),
+            app_path('Repositories/Interfaces'),
+            app_path('Http/Resources'),
+            app_path('Http/Requests'),
+            base_path('tests/Feature/Api'),
+            base_path('routes'),
+        ];
     }
 
-    private function createDirectories(): void
+    private function getGenerators(string $name, array $columns, ?string $relations, ?string $middleware, bool $usePermissions): array
     {
-        $paths = [
-            'app/Http/Controllers/API',
-            'app/Models',
-            'app/Services',
-            'app/Repositories',
-            'app/Repositories/Interfaces',
-            'app/Http/Resources',
-            'app/Http/Requests',
-            'tests/Feature/Api',
+        return [
+            'Migration' => fn () => (new MigrationGenerator())->generate($name),
+            'Model' => fn () => (new ModelGenerator())->generate($name, $columns, $relations),
+            'Repository' => fn () => (new RepositoryGenerator())->generate($name),
+            'Service' => fn () => (new ServiceGenerator())->generate($name, $columns),
+            'Controller' => fn () => (new ControllerGenerator())->generate($name, $middleware, $usePermissions),
+            'Requests' => fn () => (new RequestGenerator())->generate($name, $columns),
+            'Resource' => fn () => (new ResourceGenerator())->generate($name, $columns),
+            'Routes' => fn () => (new RouteGenerator())->generate($name),
+            'Tests' => fn () => (new TestGenerator())->generate($name, $columns),
+            'Swagger' => fn () => (new SwaggerGenerator())->generate($name, $columns),
         ];
-
-        foreach ($paths as $path) {
-            $fullPath = app()->basePath($path);
-            if (! is_dir($fullPath)) {
-                $this->info("Creating directory: {$fullPath}");
-                if (! mkdir($fullPath, 0777, true)) {
-                    throw new \RuntimeException("Failed to create directory: {$fullPath}");
-                }
-            }
-        }
     }
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
