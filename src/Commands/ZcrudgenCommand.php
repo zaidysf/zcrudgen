@@ -56,15 +56,15 @@ class ZcrudgenCommand extends Command
                 : ['id', 'name', 'created_at', 'updated_at'];
 
             $steps = [
-                'Migration' => fn () => $this->executeSafely('Migration', fn () => (new MigrationGenerator)->generate($name)),
+                'Migration' => fn () => $this->executeSafely('Migration', fn () => (new MigrationGenerator())->generate($name)),
                 'Model' => fn () => $this->executeSafely('Model', fn () => $this->generateModel($name, $columns, $relations)),
                 'Repository' => fn () => $this->executeSafely('Repository', fn () => $this->generateRepository($name)),
                 'Service' => fn () => $this->executeSafely('Service', fn () => $this->generateService($name, $columns)),
                 'Controller' => fn () => $this->executeSafely('Controller', fn () => $this->generateController($name, $middleware, $usePermissions)),
                 'Requests' => fn () => $this->executeSafely('Requests', fn () => $this->generateRequests($name, $columns)),
                 'Resource' => fn () => $this->executeSafely('Resource', fn () => $this->generateResource($name, $columns)),
-                'Routes' => fn () => $this->executeSafely('Routes', fn () => (new RouteGenerator)->generate($name)),
-                'Tests' => fn () => $this->executeSafely('Tests', fn () => (new TestGenerator)->generate($name, $columns)),
+                'Routes' => fn () => $this->executeSafely('Routes', fn () => (new RouteGenerator())->generate($name)),
+                'Tests' => fn () => $this->executeSafely('Tests', fn () => (new TestGenerator())->generate($name, $columns)),
             ];
 
             foreach ($steps as $step => $callback) {
@@ -125,37 +125,37 @@ class ZcrudgenCommand extends Command
 
     protected function generateModel(string $name, array $columns, ?string $relations): void
     {
-        $generator = new ModelGenerator;
+        $generator = new ModelGenerator();
         $generator->generate($name, $columns, $relations);
     }
 
     protected function generateRepository(string $name): void
     {
-        $generator = new RepositoryGenerator;
+        $generator = new RepositoryGenerator();
         $generator->generate($name);
     }
 
     protected function generateService(string $name, array $columns): void
     {
-        $generator = new ServiceGenerator;
+        $generator = new ServiceGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateController(string $name, ?string $middleware, bool $usePermissions): void
     {
-        $generator = new ControllerGenerator;
+        $generator = new ControllerGenerator();
         $generator->generate($name, $middleware, $usePermissions);
     }
 
     protected function generateRequests(string $name, array $columns): void
     {
-        $generator = new RequestGenerator;
+        $generator = new RequestGenerator();
         $generator->generate($name, $columns);
     }
 
     protected function generateResource(string $name, array $columns): void
     {
-        $generator = new ResourceGenerator;
+        $generator = new ResourceGenerator();
         $generator->generate($name, $columns);
     }
 }
