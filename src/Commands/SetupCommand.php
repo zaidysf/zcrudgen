@@ -42,14 +42,6 @@ class SetupCommand extends Command
         Artisan::call('vendor:publish', [
             '--provider' => 'Dedoc\Scramble\ScrambleServiceProvider',
         ]);
-
-        // Add route to web.php
-        $routePath = base_path('routes/web.php');
-        $routeContent = file_get_contents($routePath);
-
-        if (! str_contains($routeContent, 'Route::scramble')) {
-            file_put_contents($routePath, "\nRoute::scramble();\n", FILE_APPEND);
-        }
     }
 
     protected function setupDirectories(): void
@@ -75,9 +67,18 @@ class SetupCommand extends Command
     protected function setupRoutes(): void
     {
         $path = base_path('routes/api.php');
+
+        // Check if the file exists
+        if (!file_exists($path)) {
+            // Run the artisan command to install the API
+            Artisan::call('install:api');
+        }
+
+        // Check the content of the file
         $content = file_get_contents($path);
 
-        if (! str_contains($content, 'API Routes for ZCrudGen')) {
+        // Add the API routes if not already present
+        if (!str_contains($content, 'API Routes for ZCrudGen')) {
             $apiRoutes = "\n// API Routes for ZCrudGen\nRoute::prefix('api')->group(function () {\n\t// Your generated routes will be placed here\n});\n";
             file_put_contents($path, $apiRoutes, FILE_APPEND);
         }
