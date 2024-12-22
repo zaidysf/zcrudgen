@@ -73,6 +73,7 @@ A sophisticated Laravel package that automates the creation of production-ready 
 ## Dependencies
 This package relies on the following packages:
 - spatie/laravel-package-tools
+- doctrine/dbal
 - dedoc/scramble (for API documentation)
 
 ## Installation

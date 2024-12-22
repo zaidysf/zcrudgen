@@ -78,8 +78,17 @@ abstract class BaseGenerator
             return $this->getDefaultColumnInfo($column);
         }
 
-        $doctrineColumn = Schema::getConnection()
-            ->getDoctrineColumn($tableName, $column);
+        // Use the Doctrine Schema Manager to get column information
+        $schemaManager = Schema::getConnection()->getDoctrineSchemaManager();
+
+        // Ensure the table name is in the correct format for the schema manager
+        $tableDetails = $schemaManager->listTableDetails($tableName);
+
+        if (! $tableDetails->hasColumn($column)) {
+            return $this->getDefaultColumnInfo($column);
+        }
+
+        $doctrineColumn = $tableDetails->getColumn($column);
 
         return [
             'type' => $doctrineColumn->getType()->getName(),
