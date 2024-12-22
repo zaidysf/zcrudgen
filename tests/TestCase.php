@@ -25,17 +25,17 @@ class TestCase extends Orchestra
         $basePath = __DIR__.'/TestApp';
 
         $paths = [
-            $basePath . '/app/Http/Controllers/API',
-            $basePath . '/app/Models',
-            $basePath . '/app/Services',
-            $basePath . '/app/Repositories',
-            $basePath . '/app/Repositories/Interfaces',
-            $basePath . '/app/Http/Resources',
-            $basePath . '/app/Http/Requests',
-            $basePath . '/app/Providers',
-            $basePath . '/tests/Feature/Api',
-            $basePath . '/routes',
-            $basePath . '/bootstrap/cache',
+            $basePath.'/app/Http/Controllers/API',
+            $basePath.'/app/Models',
+            $basePath.'/app/Services',
+            $basePath.'/app/Repositories',
+            $basePath.'/app/Repositories/Interfaces',
+            $basePath.'/app/Http/Resources',
+            $basePath.'/app/Http/Requests',
+            $basePath.'/app/Providers',
+            $basePath.'/tests/Feature/Api',
+            $basePath.'/routes',
+            $basePath.'/bootstrap/cache',
         ];
 
         foreach ($paths as $path) {
@@ -130,7 +130,7 @@ PHP;
                 continue;
             }
 
-            $fullPath = $path . DIRECTORY_SEPARATOR . $item;
+            $fullPath = $path.DIRECTORY_SEPARATOR.$item;
             if (is_dir($fullPath)) {
                 $this->deleteDirectory($fullPath);
             } else {

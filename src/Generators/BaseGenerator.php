@@ -47,7 +47,7 @@ abstract class BaseGenerator
     {
         // Ensure the path is absolute
         if (! str_starts_with($path, '/')) {
-            $path = $this->getBasePath() . '/' . $path;
+            $path = $this->getBasePath().'/'.$path;
         }
 
         $this->makeDirectory(dirname($path));
@@ -56,7 +56,7 @@ abstract class BaseGenerator
 
     protected function generateClass(string $type, array $replacements): string
     {
-        $stubPath = __DIR__ . '/../../stubs/' . $type . '.stub';
+        $stubPath = __DIR__.'/../../stubs/'.$type.'.stub';
 
         if (! file_exists($stubPath)) {
             throw new \RuntimeException("Stub file not found: {$type}.stub");
