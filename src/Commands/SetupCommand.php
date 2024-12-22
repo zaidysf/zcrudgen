@@ -69,7 +69,7 @@ class SetupCommand extends Command
         $path = base_path('routes/api.php');
 
         // Check if the file exists
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             // Run the artisan command to install the API
             Artisan::call('install:api');
         }
@@ -78,7 +78,7 @@ class SetupCommand extends Command
         $content = file_get_contents($path);
 
         // Add the API routes if not already present
-        if (!str_contains($content, 'API Routes for ZCrudGen')) {
+        if (! str_contains($content, 'API Routes for ZCrudGen')) {
             $apiRoutes = "\n// API Routes for ZCrudGen\nRoute::prefix('api')->group(function () {\n\t// Your generated routes will be placed here\n});\n";
             file_put_contents($path, $apiRoutes, FILE_APPEND);
         }
