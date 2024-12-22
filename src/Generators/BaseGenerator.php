@@ -2,8 +2,6 @@
 
 namespace ZaidYasyaf\Zcrudgen\Generators;
 
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -76,38 +74,83 @@ abstract class BaseGenerator
 
     protected function getColumnInfo(string $tableName, string $column): array
     {
+        // Check if the table exists
         if (! Schema::hasTable($tableName)) {
             return $this->getDefaultColumnInfo($column);
         }
 
-        // Get Doctrine DBAL connection
-        $connection = DB::connection()->getDoctrineConnection();
-
-        // Get Schema Manager
-        /** @var AbstractSchemaManager $schemaManager */
-        $schemaManager = $connection->createSchemaManager();
-
-        // List table columns
-        $columns = $schemaManager->listTableColumns($tableName);
-
-        // Check if column exists
-        if (! isset($columns[$column])) {
+        // Check if the column exists
+        if (! Schema::hasColumn($tableName, $column)) {
             return $this->getDefaultColumnInfo($column);
         }
 
-        $doctrineColumn = $columns[$column];
+        // Get column details
+        $columnData = Schema::getConnection()
+            ->select("SHOW FULL COLUMNS FROM `$tableName` WHERE Field = ?", [$column]);
+
+        if (empty($columnData)) {
+            return $this->getDefaultColumnInfo($column);
+        }
+
+        $columnDetails = $columnData[0];
 
         return [
-            'type' => $doctrineColumn->getType()->getName(),
-            'length' => $doctrineColumn->getLength(),
-            'precision' => $doctrineColumn->getPrecision(),
-            'scale' => $doctrineColumn->getScale(),
-            'unsigned' => $doctrineColumn->getUnsigned(),
-            'fixed' => $doctrineColumn->getFixed(),
-            'nullable' => ! $doctrineColumn->getNotnull(),
-            'default' => $doctrineColumn->getDefault(),
-            'autoincrement' => $doctrineColumn->getAutoincrement(),
+            'type' => $this->extractType($columnDetails->Type), // E.g., varchar, int, date
+            'length' => $this->extractLengthFromType($columnDetails->Type), // E.g., 255 for varchar(255)
+            'precision' => $this->extractPrecisionFromType($columnDetails->Type), // For decimal types
+            'scale' => $this->extractScaleFromType($columnDetails->Type),         // For decimal types
+            'unsigned' => str_contains($columnDetails->Type, 'unsigned'),
+            'fixed' => $this->isFixedType($columnDetails->Type), // For fixed-length types like char
+            'nullable' => $columnDetails->Null === 'YES',
+            'default' => $columnDetails->Default,
+            'autoincrement' => $columnDetails->Extra === 'auto_increment',
         ];
+    }
+
+    protected function extractType(string $type): string
+    {
+        // Extract the base type (e.g., varchar, int, date)
+        if (preg_match('/^(\w+)/', $type, $matches)) {
+            return $matches[1];
+        }
+
+        return 'unknown';
+    }
+
+    protected function extractLengthFromType(string $type): ?int
+    {
+        // Extract length (e.g., 255 from varchar(255))
+        if (preg_match('/\((\d+)\)/', $type, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    protected function extractPrecisionFromType(string $type): ?int
+    {
+        // Extract precision for decimal types (e.g., 10 from decimal(10,2))
+        if (preg_match('/\((\d+),\d+\)/', $type, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    protected function extractScaleFromType(string $type): ?int
+    {
+        // Extract scale for decimal types (e.g., 2 from decimal(10,2))
+        if (preg_match('/\(\d+,(\d+)\)/', $type, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    protected function isFixedType(string $type): bool
+    {
+        // Check if the type is fixed-length (e.g., char)
+        return str_starts_with($type, 'char');
     }
 
     protected function getColumnDefinition(string $column, array $columnInfo): array
